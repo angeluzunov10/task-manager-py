@@ -18,3 +18,9 @@ if task:
 
 print("\n--- After Completion ---")
 manager.list_tasks()
+
+print(t1.to_dict())
+print(t2.to_dict())
+
+manager.save_to_file("tasks.json")
+
