@@ -1,4 +1,20 @@
 class BaseTask:
+    @staticmethod
+    def from_dict(data):
+        task_type = data.get('type')
+        if task_type == 'WorkTask':
+            task = WorkTask(data['title'], data['description'], data['deadline'])
+        elif task_type == 'PersonalTask':
+            task = PersonalTask(data['title'], data['description'], data['priority'])
+        else:
+            task = BaseTask(data['title'], data['description'])
+        
+        # връщаме статуса, който е бил записан
+        if data.get('status') == 'Completed':
+            task.complete_task()
+        return task
+
+
     def __init__(self, title, description):
         self.__status = 'Pending'
         self.title = title

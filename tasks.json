@@ -1,16 +1,1 @@
-[
-    {
-        "title": "Fix Bugs",
-        "description": "Fix the login issue",
-        "status": "Completed",
-        "type": "WorkTask",
-        "deadline": "2023-10-25"
-    },
-    {
-        "title": "Gym",
-        "description": "Leg day",
-        "status": "Pending",
-        "type": "PersonalTask",
-        "priority": "High"
-    }
-]
+[]

@@ -27,3 +27,15 @@ class TaskManager:
             # взима python обект (list_of_dicts), изсипва го във файлов обект (f) като го прави четим с space-ове (indent=4)
             json.dump(list_of_dicts, f, indent=4)
     
+    def load_from_file(self, filename):
+        try:
+            with open(filename, 'r') as f:
+                data = json.load(f)
+
+                # използваме BaseTask static method from_dict за да създадем обекти от речниците
+                self.tasks = [BaseTask.from_dict(d) for d in data]
+        
+        except FileNotFoundError:
+            print(f"File {filename} not found. Starting with an empty task list.")
+            self.tasks = []
+    
