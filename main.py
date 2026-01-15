@@ -9,8 +9,8 @@ manager = TaskManager()
 # manager.add_task(t1)
 # manager.add_task(t2)    
 
-# manager.load_from_file("tasks.json")
-# manager.list_tasks()
+manager.load_from_file("tasks.json")
+manager.list_tasks()
 
 print("--- All Tasks ---")
 manager.list_tasks()
