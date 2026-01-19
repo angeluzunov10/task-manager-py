@@ -42,6 +42,21 @@ class TaskManager:
     
     def get_task_by_id(self, task_id):
         return self.db.query(BaseTask).filter(BaseTask.id == task_id).first()
+    
+    def delete_task_by_id(self, task_id):
+        task = self.db.query(BaseTask).filter(BaseTask.id == task_id).first()
+
+        if task:
+            self.db.delete(task)
+            self.db.commit()
+            print(f"Task with ID '{task_id}' was deleted successfully.")
+            return True
+        
+        print(f"Task with ID '{task_id}' not found.")
+        return False
+    
+    def close_connection(self):
+        self.db.close()
 
     # def save_to_file(self, filename):
     #     # правим списък от речници (тъй като не можем директно да сериализираме обекти)
