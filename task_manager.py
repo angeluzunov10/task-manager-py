@@ -39,6 +39,9 @@ class TaskManager:
             print(f"Task '{title}' deleted.")
         else:
             print(f"Task not found.")
+    
+    def get_task_by_id(self, task_id):
+        return self.db.query(BaseTask).filter(BaseTask.id == task_id).first()
 
     # def save_to_file(self, filename):
     #     # правим списък от речници (тъй като не можем директно да сериализираме обекти)
