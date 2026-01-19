@@ -1,9 +1,13 @@
 from models import PersonalTask, WorkTask
 from task_manager import TaskManager
+from database import engine, Base
+import models
+
+Base.metadata.create_all(bind=engine) # Този ред създава таблиците в базата данни, ако те не съществуват
 
 def main():
     manager = TaskManager()
-    manager.load_from_file("tasks.json")
+    # manager.load_from_file("tasks.json")
 
     while True:
         print("\n--- Task Manager Menu ---")
@@ -21,7 +25,7 @@ def main():
             description = input("Enter task description: ")
             deadline = input("Enter task deadline (YYYY-MM-DD): ")
 
-            task = WorkTask(title, description, deadline)
+            task = WorkTask(title=title, description=description, deadline=deadline, type='WorkTask')
             manager.add_task(task)
             print(f"Work task '{title}' added.")
         elif choice == "2":
@@ -29,7 +33,7 @@ def main():
             title = input("Enter task title: ")
             description = input("Enter task description: ")
             priority = input("Enter task priority (Low/Medium/High): ")
-            task = PersonalTask(title, description, priority)
+            task = PersonalTask(title=title, description=description, priority=priority, type='PersonalTask')
             manager.add_task(task)
             print(f"Personal task '{title}' added.")
         elif choice == "3":
@@ -44,7 +48,7 @@ def main():
             else:
                 print(f"Task '{title}' not found.")
         elif choice == "5":
-            manager.save_to_file("tasks.json")
+            # manager.save_to_file("tasks.json")
             print("Data saved. Goodbye!")
             break
         else:

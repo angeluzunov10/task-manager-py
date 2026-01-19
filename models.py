@@ -1,46 +1,79 @@
-class BaseTask:
+from sqlalchemy import Column, Integer, String
+from database import Base
+
+
+class BaseTask(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True, index=True) # уникален идентификатор за всяка задача PK
+    title = Column(String, index=True)
+    description = Column(String)
+    status = Column(String, default='Pending') # сменяме го така, защото вече не е private променлива, а SQLAlchemy колонка
+    type = Column(String) # за да различаваме типовете задачи (WorkTask, PersonalTask)
+
+    # Специфични полета за наследниците
+    deadline = Column(String, nullable=True)
+    priority = Column(String, nullable=True)
+
     @staticmethod
     def from_dict(data):
         task_type = data.get('type')
         if task_type == 'WorkTask':
-            task = WorkTask(data['title'], data['description'], data['deadline'])
+            task = WorkTask(
+                title = data.get('title'),
+                description = data.get('description'),
+                deadline = data.get('deadline'),
+                type = 'WorkTask'
+            )
         elif task_type == 'PersonalTask':
-            task = PersonalTask(data['title'], data['description'], data['priority'])
+            task = PersonalTask(
+                title = data.get('title'),
+                description = data.get('description'),
+                priority = data.get('priority'),
+                type = 'PersonalTask'
+            )
         else:
-            task = BaseTask(data['title'], data['description'])
-        
+            task = BaseTask(
+                title = data.get('title'),
+                description = data.get('description'),
+                type = 'BaseTask'
+            )
+
         # връщаме статуса, който е бил записан
         if data.get('status') == 'Completed':
             task.complete_task()
         return task
 
 
-    def __init__(self, title, description):
-        self.__status = 'Pending'
-        self.title = title
-        self.description = description
+    # def __init__(self, title, description):       това вече не е нужно, защото SQLAlchemy се грижи за инициализацията
+    #     self.__status = 'Pending'
+    #     self.title = title
+    #     self.description = description 
 
     def get_status(self):
-        return self.__status
+        return self.status
     
     def complete_task(self):
-        self.__status = 'Completed'
+        self.status = 'Completed'
 
     def to_dict(self):          # сериализираме обекта в json формат
         return {
+            'id': self.id,
             'title': self.title,
             'description': self.description,
-            'status': self.get_status(), # това е private променлива, затова използваме метода get_status()
-            'type': self.__class__.__name__ # връща името на класа, тоест дали е WorkTask или PersonalTask
+            # 'status': self.get_status(), # това е private променлива, затова използваме метода get_status()
+            'status': self.status, # сменяме го така, защото вече не е private променлива, а SQLAlchemy колонка
+            'type': self.type if self.type else self.__class__.__name__ # връща името на класа, тоест дали е WorkTask или PersonalTask
         }
 
     def __str__(self):
-        return f"[{self.__status}] {self.title}"
+        # return f"[{self.__status}] {self.title}"
+        return f"[{self.status}] {self.title}"
+    
     
 class WorkTask(BaseTask):
-    def __init__(self, title, description, deadline):
-        super().__init__(title, description)
-        self.deadline = deadline
+    # def __init__(self, title, description, deadline):
+    #     super().__init__(title, description)
+    #     self.deadline = deadline
     
     def to_dict(self):
         data = super().to_dict()
@@ -51,9 +84,9 @@ class WorkTask(BaseTask):
         return super().__str__() + f" (Deadline: {self.deadline})"
 
 class PersonalTask(BaseTask):
-    def __init__(self, title, description, priority):
-        super().__init__(title, description)
-        self.priority = priority
+    # def __init__(self, title, description, priority):
+    #     super().__init__(title, description)
+    #     self.priority = priority
 
     def to_dict(self):  # сериализираме обекта в json формат 
         data = super().to_dict()
