@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String
 from database import Base
 
 
-class BaseTask(Base):
+class BaseTask(Base): # наследяваме от Base, който е в database.py, за да може SQLAlchemy да работи с този клас(модела се прави от базата)
     __tablename__ = "tasks"
     id = Column(Integer, primary_key=True, index=True) # уникален идентификатор за всяка задача PK
     title = Column(String, index=True)

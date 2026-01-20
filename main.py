@@ -1,7 +1,10 @@
 from models import PersonalTask, WorkTask
 from task_manager import TaskManager
 from database import engine, Base
-import models
+import models # Ако не импортираме models, 
+              # Python изобщо няма да прочете файла, 
+              # класовете WorkTask и PersonalTask няма да се регистрират в Base
+              # и резултатът ще бъде празна база данни.
 
 Base.metadata.create_all(bind=engine) # Този ред създава таблиците в базата данни, ако те не съществуват
 
