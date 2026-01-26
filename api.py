@@ -18,6 +18,14 @@ def get_all_tasks():
     tasks = manager.db.query(models.BaseTask).all()
     return [task.to_dict() for task in tasks]
 
+# endpoint за извличане на определена задача
+@app.get("/tasks/{task_id}", response_model=TaskResponse)
+def get_task(task_id: int):
+    task = manager.get_task_by_id(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
+
 @app.post("/tasks", response_model=TaskResponse)
 def create_task(task_data: TaskCreate):
     # проверяваме типа на задачата и създаваме съответния модел
@@ -88,7 +96,7 @@ def update_task(task_id: int, task_update: TaskUpdate):
         raise HTTPException(status_code=404, detail="Task not found")
     
     # превръщаме Pydantic модела в речник, като пропускаме непопълнените полета
-    update_data = task_update.dict(exclude_unset=True)
+    update_data = task_update.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
         setattr(task, key, value) # динамично задаваме новите стойности на полетата
