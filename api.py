@@ -1,6 +1,7 @@
 from fastapi import Body, FastAPI, HTTPException
 import models # Добавяме това, за да имаме достъп до моделите
 from task_manager import TaskManager
+from schemas import TaskCreate, TaskResponse
 
 app = FastAPI()
 manager = TaskManager()
@@ -17,27 +18,50 @@ def get_all_tasks():
     tasks = manager.db.query(models.BaseTask).all()
     return [task.to_dict() for task in tasks]
 
-# endpoint за създаване на WorkTask
-@app.post("/tasks/work")
-def create_work_task(
-    title: str = Body(...), # Body(...) указва, че тези параметри идват от тялото на заявката(това, което клиентът попълва във формата)
-    description: str = Body(...),
-    deadline: str = Body(...),
-):
-    new_task = models.WorkTask(title=title, description=description, deadline=deadline, type="WorkTask")
-    manager.add_task(new_task)
-    return {"message": "Work task created successfully", "task": new_task.to_dict()}
+@app.post("/tasks", response_model=TaskResponse)
+def create_task(task_data: TaskCreate):
+    # проверяваме типа на задачата и създаваме съответния модел
+    if task_data.task_type == 'WorkTask':
+        new_task = models.WorkTask(
+            title=task_data.title,
+            description=task_data.description,
+            deadline=task_data.deadline,
+            type='WorkTask'
+        )
+    else:
+        new_task = models.PersonalTask(
+            title=task_data.title,
+            description=task_data.description,
+            priority=task_data.priority,
+            type='PersonalTask'
+        )
 
-# endpoint за създаване на PersonalTask
-@app.post("/tasks/personal")
-def create_personal_task(
-    title: str = Body(...),
-    description: str = Body(...),
-    priority: str = Body(...),
-):
-    new_task = models.PersonalTask(title=title, description=description, priority=priority, type="PersonalTask")
     manager.add_task(new_task)
-    return {"message": "Personal task created successfully", "task": new_task.to_dict()}
+    return new_task
+
+
+# ако имаме отделни POST ендпойнти за създаване на различни типове задачи, можем да ги дефинираме така:
+# # endpoint за създаване на WorkTask
+# @app.post("/tasks/work")
+# def create_work_task(
+#     title: str = Body(...), # Body(...) указва, че тези параметри идват от тялото на заявката(това, което клиентът попълва във формата)
+#     description: str = Body(...),
+#     deadline: str = Body(...),
+# ):
+#     new_task = models.WorkTask(title=title, description=description, deadline=deadline, type="WorkTask")
+#     manager.add_task(new_task)
+#     return {"message": "Work task created successfully", "task": new_task.to_dict()}
+
+# # endpoint за създаване на PersonalTask
+# @app.post("/tasks/personal")
+# def create_personal_task(
+#     title: str = Body(...),
+#     description: str = Body(...),
+#     priority: str = Body(...),
+# ):
+#     new_task = models.PersonalTask(title=title, description=description, priority=priority, type="PersonalTask")
+#     manager.add_task(new_task)
+#     return {"message": "Personal task created successfully", "task": new_task.to_dict()}
 
 # endpoint за изтриване на задача по ID
 @app.delete("/tasks/{task_id}")
