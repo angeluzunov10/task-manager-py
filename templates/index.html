@@ -25,26 +25,26 @@
 <script>
     async function createTask() {
         // Използваме fetch API – модерен начин за пращане на заявки без презареждане на страницата.
-        const title = document.getElementById('title').value;
-        const deadline = document.getElementById('deadline').value;
+        const title = document.getElementById('title').value; // Вземаме стойностите от инпутите
+        const deadline = document.getElementById('deadline').value; // Вземаме стойностите от инпутите
 
         // body: JSON.stringify(...) превръща обекта ни в текст, за да мине през HTTP.
-        const response = await fetch('/tasks', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+        const response = await fetch('/tasks', {    // Пращаме заявка към нашия /tasks endpoint
+            method: 'POST', // Методът е POST, защото създаваме нов ресурс
+            headers: { 'Content-Type': 'application/json' }, // Казваме, че пращаме JSON
+            body: JSON.stringify({  // Тялото на заявката е JSON обект с данните за новата задача
                 title: title,
                 deadline: deadline,
                 task_type: "Work"
             })
         });
 
-        if (response.ok) {
-            window.location.reload(); 
+        if (response.ok) { // Ако всичко е минало добре
+            window.location.reload();   // Презареждаме страницата, за да видим новата задача
         } else {
             // Връщаме грешка, ако например Pydantic валидацията се провали.
-            const errorData = await response.json();
-            alert("Error: " + JSON.stringify(errorData.detail));
+            const errorData = await response.json();    // Вземаме грешката като JSON
+            alert("Error: " + JSON.stringify(errorData.detail));    // Показваме я на потребителя
         }
     }
 </script>
