@@ -17,6 +17,7 @@
     </div>
 
     <button class="save-btn" onclick="saveTask()">Запази промените</button>
+    <button class="delete-btn" onclick="deleteTask()" style="background-color: red; color: white;">Изтрий задачата</button>
     <a href="/" class="back-link">Отказ</a>
 </div>
 {% endblock %}
@@ -54,6 +55,23 @@
         if (response.ok) {
             alert("Успешно обновяване!");
             window.location.href = "/"; // Пренасочване (като redirect в Django)
+        }
+    }
+
+    async function deleteTask() {
+        // 1. Потвърждение от потребителя (добра практика)
+        if (!confirm("Сигурни ли сте, че искате да изтриете тази задача?")) return;
+
+        // 2. Изпращаме DELETE заявка към API-то
+        const response = await fetch(`/tasks/${taskId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert("Задачата е изтрита успешно!");
+            window.location.href = "/"; // Връщаме се в началната страница
+        } else {
+            alert("Грешка при изтриването.");
         }
     }
 </script>
