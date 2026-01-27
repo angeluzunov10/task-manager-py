@@ -1,6 +1,7 @@
 from models import BaseTask, PersonalTask, WorkTask
 import json
 from database import SessionLocal
+import models
 
 class TaskManager:
     def __init__(self):
@@ -26,6 +27,9 @@ class TaskManager:
 
         for task in tasks:
             print(task)
+    
+    def get_all_tasks(self):
+        return self.db.query(models.BaseTask).all()
     
     def find_task_by_title(self, title):
         # SELECT * FROM tasks WHERE title=title LIMIT 1

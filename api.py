@@ -1,22 +1,46 @@
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import Body, FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse # <- Ново
+from fastapi.staticfiles import StaticFiles # <- Ново
+from fastapi.templating import Jinja2Templates # <- Ново
+from typing import List # За списъците в response_model
 import models # Добавяме това, за да имаме достъп до моделите
 from task_manager import TaskManager
 from schemas import TaskCreate, TaskResponse, TaskUpdate
 
 app = FastAPI()
+
+# Къде са CSS/JS файловете (еквивалент на STATIC_URL в Django)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Къде са HTML файловете (еквивалент на TEMPLATES 'DIRS' в Django)
+templates = Jinja2Templates(directory="templates")
+
 manager = TaskManager()
 
-# endpoint за началната страница
-@app.get("/")
-def home():
-    return {"message": "Welcome to my Task Manager API!"}
+# endpoint за началната страница с HTML отговор
+@app.get("/", response_class=HTMLResponse)
+def read_root(request: Request):
+    # Взимаме всички задачи от базата
+    tasks = manager.get_all_tasks() 
+    # Връщаме template response (точно както render() в Django)
+    return templates.TemplateResponse("index.html", {"request": request, "tasks": tasks})
 
-# endpoint за извличане на всички задачи
-@app.get("/tasks")
+# endpoint за началната FastAPI страница
+# @app.get("/")
+# def home():
+#     return {"message": "Welcome to my Task Manager API!"}
+
+# endpoint за извличане на всички задачи (без Pydantic модел)
+# @app.get("/tasks")
+# def get_all_tasks():
+#     # Тук използваме директно заявка към базата през нашия мениджър
+#     tasks = manager.db.query(models.BaseTask).all()
+#     return [task.to_dict() for task in tasks]
+
+# Извличане на всички задачи (с Pydantic модел)
+@app.get("/tasks", response_model=List[TaskResponse])
 def get_all_tasks():
-    # Тук използваме директно заявка към базата през нашия мениджър
-    tasks = manager.db.query(models.BaseTask).all()
-    return [task.to_dict() for task in tasks]
+    return manager.get_all_tasks()
 
 # endpoint за извличане на определена задача
 @app.get("/tasks/{task_id}", response_model=TaskResponse)
@@ -88,23 +112,36 @@ def delete_task(task_id: int):
     
     return {"status": "deleted", "id": task_id}
 
-# endpoint за ъпдейт на задача по ID
-@app.put("/tasks/{task_id}")
+# # endpoint за ъпдейт на задача по ID (без Pydantic модел)
+# @app.put("/tasks/{task_id}")
+# def update_task(task_id: int, task_update: TaskUpdate):
+#     task = manager.get_task_by_id(task_id)
+#     if not task:
+#         raise HTTPException(status_code=404, detail="Task not found")
+    
+#     # превръщаме Pydantic модела в речник, като пропускаме непопълнените полета
+#     update_data = task_update.model_dump(exclude_unset=True)
+
+#     for key, value in update_data.items():
+#         setattr(task, key, value) # динамично задаваме новите стойности на полетата
+    
+#     manager.db.commit() # запазваме промените в базата
+#     manager.db.refresh(task) # обновяваме обекта с новите данни от базата
+#     return task
+
+# endpoint за ъпдейт на задача (Partial update с Pydantic V2)
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
 def update_task(task_id: int, task_update: TaskUpdate):
     task = manager.get_task_by_id(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
-    # превръщаме Pydantic модела в речник, като пропускаме непопълнените полета
+    # Взимаме само полетата, които са изпратени в заявката
     update_data = task_update.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
-        setattr(task, key, value) # динамично задаваме новите стойности на полетата
+        setattr(task, key, value)
     
-    manager.db.commit() # запазваме промените в базата
-    manager.db.refresh(task) # обновяваме обекта с новите данни от базата
+    manager.db.commit()
+    manager.db.refresh(task)
     return task
-
-
-
-
