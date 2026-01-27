@@ -13,9 +13,9 @@
 
     <ul class="task-list">
         {% for task in tasks %}
-            <li class="task-item">
-                <span>{{ task.title }}</span>
-                <span class="badge {{ task.type | lower }}">{{ task.type }}</span>
+            <li>
+                {{ task.title }} 
+                <a href="/edit/{{ task.id }}" class="edit-link">✏️ Редактирай</a>
             </li>
         {% endfor %}
     </ul>

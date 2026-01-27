@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Редактиране на задача{% endblock %}
+
+{% block content %}
+<div class="edit-card">
+    <h2>Редактиране на задача #{{ task_id }}</h2>
+    
+    <div class="field">
+        <label>Заглавие:</label>
+        <input type="text" id="edit-title">
+    </div>
+    
+    <div class="field">
+        <label>Описание:</label>
+        <textarea id="edit-desc"></textarea>
+    </div>
+
+    <button class="save-btn" onclick="saveTask()">Запази промените</button>
+    <a href="/" class="back-link">Отказ</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    //Взимаме ID-то, което Python инжектира в HTML-а
+    const taskId = "{{ task_id }}";
+
+    // window.onload се изпълнява автоматично при зареждане и кодът тръгва сам
+    window.onload = async function() {
+        const response = await fetch(`/tasks/${taskId}`); // Вземаме данните за задачата със съответното ID от сървъра
+        if (response.ok) { // Ако всичко е минало добре
+            const task = await response.json(); // Вземаме данните на задачата като JSON
+            // Попълваме автоматично полетата - това е "магията", взимам данните и ги слагам в елементите със съответните ID-та(определени в HTML-а)
+            document.getElementById('edit-title').value = task.title;
+            document.getElementById('edit-desc').value = task.description || "";
+        }
+    };
+
+    async function saveTask() { // Функция, която се вика при натискане на бутона "Запази промените"
+        const title = document.getElementById('edit-title').value; // Вземаме новите стойности от инпутите
+        const desc = document.getElementById('edit-desc').value; // Вземаме новите стойности от инпутите
+
+        // Използваме PUT, защото обновяваме съществуващ ресурс
+        const response = await fetch(`/tasks/${taskId}`, {  // Пращаме UPDATE заявка към нашия /tasks/{task_id} endpoint
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }, // Казваме, че пращаме JSON
+            body: JSON.stringify({  // Тялото на заявката е JSON обект с новите данни за задачата
+                title: title,  // Новото заглавие
+                description: desc // Новото описание
+            })
+        });
+
+        if (response.ok) {
+            alert("Успешно обновяване!");
+            window.location.href = "/"; // Пренасочване (като redirect в Django)
+        }
+    }
+</script>
+{% endblock %}

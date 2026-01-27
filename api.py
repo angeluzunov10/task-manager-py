@@ -17,6 +17,8 @@ templates = Jinja2Templates(directory="templates")
 
 manager = TaskManager()
 
+
+
 # endpoint за началната страница с HTML отговор
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
@@ -36,6 +38,11 @@ def read_root(request: Request):
 #     # Тук използваме директно заявка към базата през нашия мениджър
 #     tasks = manager.db.query(models.BaseTask).all()
 #     return [task.to_dict() for task in tasks]
+
+@app.get("/edit/{task_id}", response_class=HTMLResponse)
+def edit_task_page(request: Request, task_id: int):
+    # Предаваме task_id на шаблона, за да знае JS кое ID да търси по-късно.
+    return templates.TemplateResponse("edit.html", {"request": request, "task_id": task_id})
 
 # Извличане на всички задачи (с Pydantic модел)
 @app.get("/tasks", response_model=List[TaskResponse])
