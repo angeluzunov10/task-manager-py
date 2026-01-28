@@ -28,4 +28,14 @@ class TaskUpdate(BaseModel):
     deadline: Optional[str] = None
     priority: Optional[str] = None
 
+# Схема за потребител
+class UserCreate(BaseModel):
+    username: str
+    password: str
 
+class UserResponse(BaseModel):
+    id: int
+    username: str
+
+    class Config:
+        from_attributes = True
