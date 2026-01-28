@@ -5,7 +5,8 @@ from fastapi.templating import Jinja2Templates # <- Ново
 from typing import List # За списъците в response_model
 import models # Добавяме това, за да имаме достъп до моделите
 from task_manager import TaskManager
-from schemas import TaskCreate, TaskResponse, TaskUpdate
+from schemas import TaskCreate, TaskResponse, TaskUpdate, UserCreate, UserResponse
+from task_manager_app.auth import HashHandler
 
 app = FastAPI()
 
@@ -152,3 +153,27 @@ def update_task(task_id: int, task_update: TaskUpdate):
     manager.db.commit()
     manager.db.refresh(task)
     return task
+
+@app.post("/register", response_model=UserResponse)
+def register_user(user_data: UserCreate):
+    # 1.Проверяваме дали потребителското име вече съществува
+    existing_user = manager.db.query(models.User).filter(models.User.username == user_data.username).first()
+
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already taken")
+    
+    # 2. Хешираме паролата
+    hashed_password = HashHandler.hash_password(user_data.password)
+
+    # 3.Създаваме нов потребител
+    new_user = models.User(
+        username=user_data.username,
+        password=hashed_password
+    )
+
+    manager.db.add(new_user)
+    manager.db.commit()
+    manager.db.refresh(new_user)
+
+    return new_user
+    
