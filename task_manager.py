@@ -1,11 +1,12 @@
 from models import BaseTask, PersonalTask, WorkTask
 import json
-from database import SessionLocal
+from database import SessionLocal, engine
 import models
 
 class TaskManager:
     def __init__(self):
-        self.tasks = [] # това вече не ни е нужно, защото ще ползваме база данни
+        #self.tasks = [] # това вече не ни е нужно, защото ще ползваме база данни
+        self.engine = engine
         self.db = SessionLocal()  # Създаваме сесия за работа с базата данни
 
     def add_task(self, task):

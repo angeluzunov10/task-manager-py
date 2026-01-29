@@ -6,7 +6,7 @@ from typing import List # За списъците в response_model
 import models # Добавяме това, за да имаме достъп до моделите
 from task_manager import TaskManager
 from schemas import TaskCreate, TaskResponse, TaskUpdate, UserCreate, UserResponse
-from task_manager_app.auth import HashHandler
+from auth import HashHandler
 
 app = FastAPI()
 
@@ -16,9 +16,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Къде са HTML файловете (еквивалент на TEMPLATES 'DIRS' в Django)
 templates = Jinja2Templates(directory="templates")
 
-manager = TaskManager()
+manager = TaskManager() # казваме кой е нашият manager
 
-
+models.Base.metadata.create_all(bind=manager.engine) # това е редът, който "ражда" таблиците в празния .db файл
 
 # endpoint за началната страница с HTML отговор
 @app.get("/", response_class=HTMLResponse)
@@ -168,7 +168,7 @@ def register_user(user_data: UserCreate):
     # 3.Създаваме нов потребител
     new_user = models.User(
         username=user_data.username,
-        password=hashed_password
+        hashed_password=hashed_password
     )
 
     manager.db.add(new_user)
@@ -176,4 +176,7 @@ def register_user(user_data: UserCreate):
     manager.db.refresh(new_user)
 
     return new_user
-    
+
+@app.get("/register", response_class=HTMLResponse)
+def get_register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})

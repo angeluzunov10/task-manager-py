@@ -1,0 +1,40 @@
+{% extends "auth_base.html" %}
+{% block auth_title %}Създаване на профил{% endblock %}
+{% block btn_text %}Регистрирай ме{% endblock %}
+
+{% block auth_footer %}
+    <p>Вече имаш профил? <a href="/login">Влез тук!</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    // тази функция(асинхронна, защото може да чака сървъра без да забива страницата)
+    // ще вземе името и паролата от формата, ще ги прати към сървъра и ще изчака отговора
+    // ако отговора е ок, ще регистрира потребителя, ако ли не ще върне грешка
+    async function register() {
+        // 1. взимаме данните, въведени във формата
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        // 2. Пращаме заявка за регистрация
+        const response = await fetch('/register', {             // отиваме до сървъра на адрес /register
+            method: 'POST',                                     // казваме какъв тип е заявката - POST защото ще създаваме запис
+            headers: {'Content-Type': 'application/json'},      // уточняваме какви данни изпращаме - пращаме ти данните в JSON
+            body: JSON.stringify({                              // Защо ползваме JSON.stringify? Защото API-то очаква JSON текст, а не JS обект.
+                username: user,
+                password: pass
+            })
+        })
+
+        // 3. Правим проверка дали регистрацията е минала успешно
+        if (response.ok){
+            alert("Регистрацията е успешна! Сега се логни.");
+            window.location.href = "/logim"; // пренасочва ни към login
+        } else {
+            const error = await response.json();
+            alert("Грешка: " + error.detail);
+        }
+    }
+</script>
+{% endblock %}
