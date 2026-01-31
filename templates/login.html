@@ -1,0 +1,32 @@
+{% extends "auth_base.html" %}
+{% block auth_title %}Вход в системата{% endblock %}
+{% block btn_text %}Влез{% endblock %}
+
+{% block auth_footer %}
+    <p>Нямаш профил? <a href="/register">Регистрирай се</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function submitAuth() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        const response = await fetch('/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // ЗАПАЗВАНЕ: Слагаме токена в паметта на браузъра
+            localStorage.setItem('token', data.access_token);
+            alert("Успешен вход!");
+            window.location.href = "/"; // Пренасочваме към началната страница със задачите
+        } else {
+            alert("Грешно потребителско име или парола");
+        }
+    }
+</script>
+{% endblock %}

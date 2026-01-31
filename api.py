@@ -6,7 +6,8 @@ from typing import List # За списъците в response_model
 import models # Добавяме това, за да имаме достъп до моделите
 from task_manager import TaskManager
 from schemas import TaskCreate, TaskResponse, TaskUpdate, UserCreate, UserResponse
-from auth import HashHandler
+from auth import HashHandler, TokenHandler
+import schemas
 
 app = FastAPI()
 
@@ -180,3 +181,23 @@ def register_user(user_data: UserCreate):
 @app.get("/register", response_class=HTMLResponse)
 def get_register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
+
+
+@app.get("/login", response_class=HTMLResponse)
+def get_login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.post("/login")
+def login_user(user_data: schemas.UserCreate):
+    # 1. Проверяваме дали потребителят съществува
+    user = manager.db.query(models.User).filter(models.User.username == user_data.username).first()
+    
+    # 2. Проверяваме паролата
+    if not user or not HashHandler.verify_password(user_data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    # 3. Създаваме JWT токен
+    access_token = TokenHandler.create_access_token(data={"sub": user.username})
+
+    # 4. Връщаме токена на frontend-a
+    return {"access_token": access_token, "token_type": "bearer"}
