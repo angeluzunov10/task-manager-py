@@ -12,7 +12,7 @@
     // тази функция(асинхронна, защото може да чака сървъра без да забива страницата)
     // ще вземе името и паролата от формата, ще ги прати към сървъра и ще изчака отговора
     // ако отговора е ок, ще регистрира потребителя, ако ли не ще върне грешка
-    async function register() {
+    async function submitAuth() {
         // 1. взимаме данните, въведени във формата
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
@@ -30,7 +30,7 @@
         // 3. Правим проверка дали регистрацията е минала успешно
         if (response.ok){
             alert("Регистрацията е успешна! Сега се логни.");
-            window.location.href = "/logim"; // пренасочва ни към login
+            window.location.href = "/login"; // пренасочва ни към login
         } else {
             const error = await response.json();
             alert("Грешка: " + error.detail);
