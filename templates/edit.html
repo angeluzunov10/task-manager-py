@@ -1,24 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Редактиране на задача{% endblock %}
+{% block title %}Редактиране{% endblock %}
 
 {% block content %}
-<div class="edit-card">
-    <h2>Редактиране на задача #{{ task_id }}</h2>
+<div class="task-card">
+    <h2>🎯 Редактиране на задача #{{ task_id }}</h2>
     
     <div class="field">
-        <label>Заглавие:</label>
+        <label>Заглавие</label>
         <input type="text" id="edit-title">
     </div>
     
     <div class="field">
-        <label>Описание:</label>
-        <textarea id="edit-desc"></textarea>
+        <label>Описание</label>
+        <textarea id="edit-desc" rows="4"></textarea>
     </div>
 
-    <button class="save-btn" onclick="saveTask()">Запази промените</button>
-    <button class="delete-btn" onclick="deleteTask()" style="background-color: red; color: white;">Изтрий задачата</button>
-    <a href="/" class="back-link">Отказ</a>
+    <button class="btn-primary" onclick="saveTask()" style="margin-bottom: 10px;">💾 Запази промените</button>
+    <button onclick="deleteTask()" style="background: var(--danger); color: white; border: none; width: 100%; padding: 0.75rem; border-radius: 8px; font-weight: 600; cursor: pointer;">🗑️ Изтрий задачата</button>
+    
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="/" class="edit-link">⬅️ Назад към списъка</a>
+    </div>
 </div>
 {% endblock %}
 

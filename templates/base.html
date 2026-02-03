@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Task Manager{% endblock %}</title>
+    <title>{% block title %}Task Master Pro{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
-        <div class="container">
-            <a href="/" class="logo">Task Master Pro</a>
+        <div class="container nav-wrapper">
+            <a href="/" class="logo">Task Master <span>Pro</span></a>
+            <div id="auth-links">
+                <a href="/login" id="login-link" class="nav-link">Вход</a>
+                <a href="/register" id="register-link" class="nav-link btn-outline">Регистрация</a>
+                <button onclick="logout()" id="logout-btn" class="btn-logout" style="display: none;">Изход</button>
+            </div>
         </div>
     </nav>
 
@@ -18,9 +24,33 @@
     </main>
 
     <footer class="footer">
-        <p>&copy; 2026 FastAPI Task Manager</p>
+        <div class="container">
+            <p>&copy; 2026 Task Master Pro. Built with FastAPI & Wit.</p>
+        </div>
     </footer>
 
+    <script>
+        // Глобална логика за навигацията
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const logoutBtn = document.getElementById('logout-btn');
+            const loginLink = document.getElementById('login-link');
+            const registerLink = document.getElementById('register-link');
+
+            if (token) {
+                logoutBtn.style.display = 'block';
+                loginLink.style.display = 'none';
+                registerLink.style.display = 'none';
+            }
+        });
+
+        function logout() {
+            if (confirm("Сигурни ли сте, че искате да излезете?")) {
+                localStorage.removeItem('token');
+                window.location.href = "/login";
+            }
+        }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

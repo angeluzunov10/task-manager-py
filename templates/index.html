@@ -1,28 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Tasks{% endblock %}
+{% block title %}Начало - Моите Задачи{% endblock %}
 
 {% block content %}
-    <h1>My Tasks</h1>
+<div class="task-card">
+    <h1>📝 Моите Задачи</h1>
     
     <div class="form-group">
-        <input type="text" id="title" placeholder="Task Title">
-        <input type="text" id="deadline" placeholder="Deadline (YYYY-MM-DD)">
-        <button onclick="createTask()">Add Work Task</button>
+        <label>Нова задача</label>
+        <input type="text" id="title" placeholder="Какво трябва да се свърши?">
+        <label>Краен срок</label>
+        <input type="date" id="deadline"> <button class="btn-primary" onclick="createTask()">➕ Добави Работна Задача</button>
     </div>
+</div>
 
+<div id="tasks-container">
     <ul class="task-list">
         {% for task in tasks %}
-            <li>
-                {{ task.title }} 
+            <li class="task-item">
+                <span>{{ task.title }}</span>
                 <a href="/edit/{{ task.id }}" class="edit-link">✏️ Редактирай</a>
             </li>
         {% endfor %}
     </ul>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    // Защита: Ако няма токен, пренасочи към Login веднага
+    if (!localStorage.getItem('token')) {
+        window.location.href = "/login";
+    }
+
     async function createTask() {
         // Използваме fetch API – модерен начин за пращане на заявки без презареждане на страницата.
         const title = document.getElementById('title').value; // Вземаме стойностите от инпутите
