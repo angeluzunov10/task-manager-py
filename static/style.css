@@ -35,6 +35,17 @@ body {
     display: flex; /* Подрежда елементите в ред */
     justify-content: space-between; /* Лого вляво, бутони вдясно */
     align-items: center; /* Центрира ги вертикално */
+    width: 100%;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.nav-link:hover {
+    color: var(--primary);
 }
 
 .logo {
@@ -44,6 +55,12 @@ body {
     color: var(--text);
 }
 .logo span { color: var(--primary); }
+
+#auth-links {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Разстояние между бутоните */
+}
 
 /* Task Cards & List */
 .task-card {
@@ -68,7 +85,7 @@ body {
     justify-content: space-between;
     align-items: center;
     border: 1px solid var(--border);
-    transition: transform 0.2s;
+    transition: transform 0.8s;
 }
 
 .task-item:hover {
