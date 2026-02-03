@@ -15,6 +15,22 @@ body {
     color: var(--text);
     margin: 0;
     line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+main.container {
+    flex: 1;
+}
+
+footer {
+    background: var(--white);
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: #64748b;
 }
 
 .container {
@@ -85,7 +101,7 @@ body {
     justify-content: space-between;
     align-items: center;
     border: 1px solid var(--border);
-    transition: transform 0.8s;
+    transition: transform 0.2s;
 }
 
 .task-item:hover {
