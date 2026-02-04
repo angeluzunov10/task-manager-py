@@ -3,24 +3,29 @@
 {% block title %}Редактиране{% endblock %}
 
 {% block content %}
-<div class="task-card">
-    <h2>🎯 Редактиране на задача #{{ task_id }}</h2>
-    
-    <div class="field">
-        <label>Заглавие</label>
-        <input type="text" id="edit-title">
-    </div>
-    
-    <div class="field">
-        <label>Описание</label>
-        <textarea id="edit-desc" rows="4"></textarea>
-    </div>
+<div class="auth-container" style="margin-top: 2rem;"> <div class="auth-box" style="max-width: 500px;"> <h2 style="color: var(--primary); margin-bottom: 1.5rem; text-align: center;">🎯 Редактиране</h2>
+        
+        <div class="field-group">
+            <label style="font-weight: 600; font-size: 0.9rem;">Заглавие на задачата</label>
+            <input type="text" id="edit-title" placeholder="Име на задачата">
+        </div>
+        
+        <div class="field-group">
+            <label style="font-weight: 600; font-size: 0.9rem;">Описание / Бележки</label>
+            <textarea id="edit-desc" rows="5" placeholder="Добави детайли тук..." 
+                      style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1.2rem; font-family: inherit;"></textarea>
+        </div>
 
-    <button class="btn-primary" onclick="saveTask()" style="margin-bottom: 10px;">💾 Запази промените</button>
-    <button onclick="deleteTask()" style="background: var(--danger); color: white; border: none; width: 100%; padding: 0.75rem; border-radius: 8px; font-weight: 600; cursor: pointer;">🗑️ Изтрий задачата</button>
-    
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="/" class="edit-link">⬅️ Назад към списъка</a>
+        <div class="action-buttons" style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn-primary" onclick="saveTask()">💾 Запази промените</button>
+            <button onclick="deleteTask()" 
+                    style="background: none; color: var(--danger); border: 1px solid var(--danger); padding: 0.75rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;"
+                    onmouseover="this.style.background='var(--danger)'; this.style.color='white'"
+                    onmouseout="this.style.background='none'; this.style.color='var(--danger)'">
+                🗑️ Изтрий задачата
+            </button>
+            <a href="/" style="text-align: center; text-decoration: none; color: #64748b; font-size: 0.9rem; margin-top: 10px;">Отказ и връщане</a>
+        </div>
     </div>
 </div>
 {% endblock %}

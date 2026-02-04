@@ -3,63 +3,33 @@
 {% block title %}Начало - Моите Задачи{% endblock %}
 
 {% block content %}
-<div class="task-card animate-in">
-    <h2>🚀 Нова задача</h2>
-    <div class="input-group">
-        <div class="input-field">
-            <label for="title">Какво планираш?</label>
-            <input type="text" id="title" placeholder="напр. Подготовка на презентация">
+<div class="task-card">
+    <h2 style="margin-top: 0; color: var(--primary);">🚀 Нова задача</h2>
+    <div class="form-grid" style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 15px; align-items: end;">
+        <div class="field-group">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px;">Заглавие</label>
+            <input type="text" id="title" placeholder="Какво планираш?" style="margin-bottom: 0;">
         </div>
-        <div class="input-field">
-            <label for="deadline">Краен срок</label>
-            <input type="date" id="deadline">
+        <div class="field-group">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px;">Краен срок</label>
+            <input type="date" id="deadline" style="margin-bottom: 0;">
         </div>
+        <button class="btn-primary" onclick="createTask()" style="padding: 0.8rem 1.5rem;">Добави</button>
     </div>
-    <button class="btn-primary main-action" onclick="createTask()">Добави в списъка</button>
 </div>
 
-<div id="tasks-container">
+<div class="tasks-section" style="margin-top: 30px;">
+    <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📋 Списък със задачи</h3>
     <ul class="task-list">
         {% for task in tasks %}
             <li class="task-item">
-                <span>{{ task.title }}</span>
+                <div class="task-info">
+                    <strong style="display: block;">{{ task.title }}</strong>
+                    <small style="color: #64748b;">📅 Краен срок: {{ task.deadline or 'Няма' }}</small>
+                </div>
                 <a href="/edit/{{ task.id }}" class="edit-link">✏️ Редактирай</a>
             </li>
         {% endfor %}
     </ul>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    // Защита: Ако няма токен, пренасочи към Login веднага
-    if (!localStorage.getItem('token')) {
-        window.location.href = "/login";
-    }
-
-    async function createTask() {
-        // Използваме fetch API – модерен начин за пращане на заявки без презареждане на страницата.
-        const title = document.getElementById('title').value; // Вземаме стойностите от инпутите
-        const deadline = document.getElementById('deadline').value; // Вземаме стойностите от инпутите
-
-        // body: JSON.stringify(...) превръща обекта ни в текст, за да мине през HTTP.
-        const response = await fetch('/tasks', {    // Пращаме заявка към нашия /tasks endpoint
-            method: 'POST', // Методът е POST, защото създаваме нов ресурс
-            headers: { 'Content-Type': 'application/json' }, // Казваме, че пращаме JSON
-            body: JSON.stringify({  // Тялото на заявката е JSON обект с данните за новата задача
-                title: title,
-                deadline: deadline,
-                task_type: "Work"
-            })
-        });
-
-        if (response.ok) { // Ако всичко е минало добре
-            window.location.reload();   // Презареждаме страницата, за да видим новата задача
-        } else {
-            // Връщаме грешка, ако например Pydantic валидацията се провали.
-            const errorData = await response.json();    // Вземаме грешката като JSON
-            alert("Error: " + JSON.stringify(errorData.detail));    // Показваме я на потребителя
-        }
-    }
-</script>
 {% endblock %}
