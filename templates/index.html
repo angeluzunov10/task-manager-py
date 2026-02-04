@@ -4,17 +4,17 @@
 
 {% block content %}
 <div class="task-card">
-    <h2 style="margin-top: 0; color: var(--primary);">🚀 Нова задача</h2>
-    <div class="form-grid" style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 15px; align-items: end;">
+    <h2 style="color: var(--primary); margin-top: 0;">🚀 Нова задача</h2>
+    <div class="form-grid">
         <div class="field-group">
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px;">Заглавие</label>
-            <input type="text" id="title" placeholder="Какво планираш?" style="margin-bottom: 0;">
+            <label>Заглавие</label>
+            <input type="text" id="title" placeholder="Какво планираш?">
         </div>
         <div class="field-group">
-            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px;">Краен срок</label>
-            <input type="date" id="deadline" style="margin-bottom: 0;">
+            <label>Краен срок</label>
+            <input type="date" id="deadline">
         </div>
-        <button class="btn-primary" onclick="createTask()" style="padding: 0.8rem 1.5rem;">Добави</button>
+        <button class="btn-primary" onclick="createTask()">Добави</button>
     </div>
 </div>
 

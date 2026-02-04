@@ -34,7 +34,7 @@ footer {
 }
 
 .container {
-    max-width: 800px; /* Намалихме го за по-центриран вид */
+    max-width: 800px; /* Намалям го за по-центриран вид */
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -137,4 +137,54 @@ input, textarea {
     color: var(--primary);
     font-size: 0.9rem;
     font-weight: 600;
+}
+
+/* Стилизиране на бутона за изход */
+.btn-logout-nav {
+    background-color: transparent !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    padding: 5px 15px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.3s !important;
+}
+
+.btn-logout-nav:hover {
+    background-color: var(--danger) !important;
+    color: white !important;
+    border-color: var(--danger) !important;
+}
+
+/* Оправя разстоянието във формата */
+.form-grid {
+    gap: 20px !important; /* Това ще раздели полетата едно от друго */
+}
+
+/* Специални корекции за формата в index.html */
+.form-grid {
+    display: grid !important;
+    grid-template-columns: 2fr 1fr auto !important;
+    gap: 15px !important;
+    align-items: flex-end !important; /* Подравнява ги перфектно долу */
+}
+
+/* Уеднаквяваме височината на полетата и бутона */
+.form-grid input, 
+.form-grid .btn-primary {
+    height: 45px !important;
+    margin: 0 !important; /* маха margin-ите, които ги разминават */
+    box-sizing: border-box !important;
+}
+
+.form-grid .btn-primary {
+    width: auto !important; /* Бутонът да не е 100%, а колкото е текста му */
+    padding: 0 25px !important;
+}
+
+.field-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 5px;
 }
