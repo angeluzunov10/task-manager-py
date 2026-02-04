@@ -3,15 +3,19 @@
 {% block title %}Начало - Моите Задачи{% endblock %}
 
 {% block content %}
-<div class="task-card">
-    <h1>📝 Моите Задачи</h1>
-    
-    <div class="form-group">
-        <label>Нова задача</label>
-        <input type="text" id="title" placeholder="Какво трябва да се свърши?">
-        <label>Краен срок</label>
-        <input type="date" id="deadline"> <button class="btn-primary" onclick="createTask()">➕ Добави Работна Задача</button>
+<div class="task-card animate-in">
+    <h2>🚀 Нова задача</h2>
+    <div class="input-group">
+        <div class="input-field">
+            <label for="title">Какво планираш?</label>
+            <input type="text" id="title" placeholder="напр. Подготовка на презентация">
+        </div>
+        <div class="input-field">
+            <label for="deadline">Краен срок</label>
+            <input type="date" id="deadline">
+        </div>
     </div>
+    <button class="btn-primary main-action" onclick="createTask()">Добави в списъка</button>
 </div>
 
 <div id="tasks-container">
