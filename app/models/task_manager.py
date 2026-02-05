@@ -1,7 +1,7 @@
-from models import BaseTask, PersonalTask, WorkTask
+from app.models.models import BaseTask, PersonalTask, WorkTask
 import json
-from database import SessionLocal, engine
-import models
+from app.database import SessionLocal, engine
+import app.models.models as models
 
 class TaskManager:
     def __init__(self):

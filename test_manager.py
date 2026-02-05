@@ -1,6 +1,6 @@
 import unittest
-from models import WorkTask
-from task_manager import TaskManager
+from task_manager_app.app.models.models import WorkTask
+from task_manager_app.app.models.task_manager import TaskManager
 
 class TestTaskManager(unittest.TestCase):
     def setUp(self):
