@@ -12,20 +12,34 @@
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
 
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: user, password: pass })
-        });
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass }),
+                // Важно: казваме на fetch да не следва автоматично редиректа,
+                // за да можем ние да го хванем тук
+                redirect: 'follow' 
+            });
 
-        if (response.ok) {
-            const data = await response.json();
-            // ЗАПАЗВАНЕ: Слагаме токена в паметта на браузъра
-            localStorage.setItem('token', data.access_token);
-            alert("Успешен вход!");
-            window.location.href = "/"; // Пренасочваме към началната страница със задачите
-        } else {
-            alert("Грешно потребителско име или парола");
+            // 1. Проверяваме дали сме пренасочени от сървъра
+            if (response.redirected) {
+                // Сървърът е сложил бисквитката и ни е пратил адрес
+                window.location.href = response.url; 
+                return;
+            }
+
+            // 2. Проверяваме за успех (ако не е имало редирект, но е 200 OK)
+            if (response.ok) {
+                window.location.href = "/";
+            } else {
+                // Опитваме се да извлечем детайли за грешката, ако има такива
+                const errorData = await response.json().catch(() => ({ detail: "Грешно име или парола" }));
+                alert(errorData.detail || "Грешка при вход");
+            }
+        } catch (error) {
+            console.error("Грешка:", error);
+            alert("Възникна проблем със свързването");
         }
     }
 </script>

@@ -3,6 +3,21 @@
 {% block title %}Начало - Моите Задачи{% endblock %}
 
 {% block content %}
+<div class="user-nav" style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--border);">
+    <div>
+        <span>👋 Здравей, <strong>{{ user.username }}</strong>!</span>
+        <span class="badge" style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; margin-left: 10px;">
+            {{ user.role | upper }}
+        </span>
+    </div>
+    <div style="display: flex; gap: 15px;">
+        {% if user.role == "admin" %}
+            <a href="/admin/dashboard" class="btn-admin" style="text-decoration: none; color: #dc2626; font-weight: bold; border: 1px solid #dc2626; padding: 5px 10px; border-radius: 5px;">🛠️ Админ Панел</a>
+        {% endif %}
+        <a href="/logout" style="text-decoration: none; color: var(--text); font-weight: bold;">🚪 Изход</a>
+    </div>
+</div>
+
 <div class="task-card">
     <h2 style="color: var(--primary); margin-top: 0;">🚀 Нова задача</h2>
     <div class="form-grid">

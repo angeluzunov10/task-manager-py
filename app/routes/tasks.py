@@ -9,6 +9,8 @@ from app.schemas.schemas import TaskCreate, TaskResponse, TaskUpdate
 import app.models.models as models # Добавяме това, за да имаме достъп до моделите
 from fastapi.templating import Jinja2Templates
 
+from app.dependencies import get_current_user
+
 # Настройваме шаблоните спрямо новата папка app/
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
@@ -19,8 +21,30 @@ manager = TaskManager()
 
 @router.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
-    tasks = manager.get_all_tasks() 
-    return templates.TemplateResponse("index.html", {"request": request, "tasks": tasks})
+    token = request.cookies.get("access_token")
+    
+    # Ако няма токен, предаваме user=None
+    if not token:
+        return templates.TemplateResponse("landing.html", {"request": request, "user": None})
+    
+    try:
+        if token.startswith("Bearer "):
+            token = token.replace("Bearer ", "")
+        
+        user = get_current_user(token)
+        tasks = manager.get_all_tasks() 
+        
+        return templates.TemplateResponse("index.html", {
+            "request": request, 
+            "tasks": tasks, 
+            "user": user # Тук предаваме обекта
+        })
+    except Exception as e:
+        print(f"Auth error: {e}")
+        # При грешка също предаваме user=None
+        response = templates.TemplateResponse("landing.html", {"request": request, "user": None})
+        response.delete_cookie("access_token")
+        return response
 
 @router.get("/edit/{task_id}", response_class=HTMLResponse)
 def edit_task_page(request: Request, task_id: int):

@@ -13,9 +13,16 @@
         <div class="container nav-wrapper">
             <a href="/" class="logo">Task Master <span>Pro</span></a>
             <div id="auth-links">
-                <a href="/login" id="login-link" class="nav-link">Вход</a>
-                <a href="/register" id="register-link" class="nav-link btn-outline">Регистрация</a>
-                <button onclick="logout()" id="logout-btn" class="btn-logout-nav" style="display: none;">Изход</button>
+                {% if user %}
+                    <span style="margin-right: 15px; color: var(--primary);">👋 {{ user.username }}</span>
+                    {% if user.role == "admin" %}
+                        <a href="/admin/dashboard" class="nav-link" style="color: #dc2626;">🛠️ Админ</a>
+                    {% endif %}
+                    <a href="/logout" class="nav-link btn-logout-nav">Изход</a>
+                {% else %}
+                    <a href="/login" class="nav-link">Вход</a>
+                    <a href="/register" class="nav-link btn-outline">Регистрация</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -30,28 +37,6 @@
         </div>
     </footer>
 
-    <script>
-        // Глобална логика за навигацията
-        window.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
-            const logoutBtn = document.getElementById('logout-btn');
-            const loginLink = document.getElementById('login-link');
-            const registerLink = document.getElementById('register-link');
-
-            if (token) {
-                logoutBtn.style.display = 'block';
-                loginLink.style.display = 'none';
-                registerLink.style.display = 'none';
-            }
-        });
-
-        function logout() {
-            if (confirm("Сигурни ли сте, че искате да излезете?")) {
-                localStorage.removeItem('token');
-                window.location.href = "/login";
-            }
-        }
-    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

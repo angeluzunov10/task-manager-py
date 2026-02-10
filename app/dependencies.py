@@ -1,8 +1,11 @@
+from dotenv import load_dotenv
 from fastapi import HTTPException, Depends, status
 from jose import jwt, JWTError
 import os
 from app.models.models import User, UserRole
 from app.models.task_manager import TaskManager
+
+load_dotenv()  # Зареждаме .env файла, за да имаме достъп до променливите на средата
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")

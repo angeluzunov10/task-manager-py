@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from app.schemas.schemas import UserCreate, UserResponse
 import app.models.models as models
 from app.models.task_manager import TaskManager
@@ -72,4 +72,19 @@ def login_user(user_data: UserCreate):
         raise HTTPException(status_code=401, detail="Invalid username or password")
     
     access_token = TokenHandler.create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+
+
+    response = RedirectResponse(url="/", status_code=303)
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+
+    return response
+
+@router.get("/logout")
+def logout_user():
+    # Създаваме пренасочване към началната страница
+    response = RedirectResponse(url="/", status_code=303)
+
+    # Изтриваме бисквитката
+    response.delete_cookie(key="access_token")
+    
+    return response

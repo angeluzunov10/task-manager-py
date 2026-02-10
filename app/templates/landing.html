@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Добре дошли - Task Master{% endblock %}
+
+{% block content %}
+<div class="welcome-container" style="text-align: center; padding: 50px 20px; background: white; border-radius: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border);">
+    <h1 style="color: var(--primary); font-size: 2.5em; margin-bottom: 20px;">🚀 Task Master</h1>
+    <p style="color: #64748b; font-size: 1.2em; margin-bottom: 30px;">
+        Твоят личен асистент за организация на задачи. <br>
+        Влез в профила си, за да започнеш.
+    </p>
+    
+    <div class="auth-options" style="display: flex; gap: 20px; justify-content: center;">
+        <a href="/login" class="btn-primary" style="text-decoration: none; padding: 12px 30px;">Вход</a>
+        <a href="/register" class="edit-link" style="text-decoration: none; padding: 12px 30px; border: 1px solid var(--primary); border-radius: 8px;">Регистрация</a>
+    </div>
+</div>
+{% endblock %}
