@@ -1,3 +1,4 @@
+import enum
 from sqlalchemy import Column, Integer, String, ForeignKey
 from app.database import Base
 from sqlalchemy.orm import relationship # за връзки между обектите/таблиците
@@ -101,6 +102,10 @@ class PersonalTask(BaseTask):
     def __str__(self):
         return super().__str__() + f" (Priority: {self.priority})"
 
+class UserRole(str, enum.Enum):     # използваме enum, за да дефинираме различните роли на потребителите в системата, 
+    ADMIN = "admin"                 # което ще ни помогне да правим различни нива на достъп
+    EDITOR = "editor"
+    USER = "user"
 
 class User(Base):
     __tablename__ = "users"
@@ -112,3 +117,5 @@ class User(Base):
     # back_populates казва на SQLAlchemy как се казва атрибутът в другия модел
     tasks = relationship("BaseTask", back_populates="owner")
 
+    # тук добавяме ново поле за ролята на потребителя, което ще ни помага да правим различни нива на достъп
+    role = Column(String, default=UserRole.USER)
