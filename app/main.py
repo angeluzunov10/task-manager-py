@@ -19,7 +19,7 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), na
 app.include_router(tasks.router)
 app.include_router(auth.router)
 
-@app.get('/favicon.ico', include_in_schema=False)
+@app.get('/favicon.ico', include_in_schema=False)   # include_in_schema=False за да не се показва в документацията
 async def favicon():
     file_path = os.path.join(BASE_DIR, "static", "favicon.ico")
     if os.path.exists(file_path):
