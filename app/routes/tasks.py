@@ -28,7 +28,13 @@ def read_root(request: Request):
         user = get_current_user(request)
         
         # Ако горното не хвърли грешка, значи имаме потребител
-        tasks = manager.get_all_tasks() 
+        # ЛОГИКА ЗА ФИЛТРИРАНЕ:
+        # Използваме .filter() с оператор "ИЛИ" (|)
+        # Искаме задачи, които са 'WorkTask' ИЛИ такива, чийто owner_id съвпада с текущия потребител
+        tasks = manager.db.query(models.BaseTask).filter(
+            (models.BaseTask.type == 'WorkTask') | 
+            (models.BaseTask.owner_id == user.id)
+        ).all()
         
         return templates.TemplateResponse("index.html", {
             "request": request, 
@@ -71,6 +77,7 @@ def create_task(task_data: TaskCreate, user=Depends(get_current_user)):
             title=task_data.title,
             description=task_data.description,
             deadline=task_data.deadline,
+            owner_id=user.id,
             type='WorkTask'
         )
     elif task_data.priority:
@@ -78,6 +85,7 @@ def create_task(task_data: TaskCreate, user=Depends(get_current_user)):
             title=task_data.title,
             description=task_data.description,
             priority=task_data.priority,
+            owner_id=user.id,
             type='PersonalTask'
         )
     else:
