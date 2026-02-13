@@ -3,44 +3,67 @@
 {% block title %}Начало - Моите Задачи{% endblock %}
 
 {% block content %}
-<div class="user-nav" style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--border);">
+<div class="user-nav">
     <div>
         <span>👋 Здравей, <strong>{{ user.username }}</strong>!</span>
-        <span class="badge" style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; margin-left: 10px;">
-            {{ user.role | upper }}
-        </span>
+        <span class="badge">{{ user.role }}</span>
     </div>
-    <div style="display: flex; gap: 15px;">
+    <div style="display: flex; gap: 15px; align-items: center;">
         {% if user.role == "admin" %}
-            <a href="/admin/dashboard" class="btn-admin" style="text-decoration: none; color: #dc2626; font-weight: bold; border: 1px solid #dc2626; padding: 5px 10px; border-radius: 5px;">🛠️ Админ Панел</a>
+            <a href="/admin/dashboard" class="edit-link" style="color: var(--danger);">🛠️ Админ Панел</a>
         {% endif %}
-        <a href="/logout" style="text-decoration: none; color: var(--text); font-weight: bold;">🚪 Изход</a>
+        <a href="/logout" class="nav-link" style="font-weight: bold;">🚪 Изход</a>
     </div>
 </div>
 
 <div class="task-card">
-    <h2 style="color: var(--primary); margin-top: 0;">🚀 Нова задача</h2>
+    <h2>🚀 Нова задача</h2>
     <div class="form-grid">
         <div class="field-group">
-            <label>Заглавие</label>
+            <label for="title">Заглавие</label>
             <input type="text" id="title" placeholder="Какво планираш?">
         </div>
+
         <div class="field-group">
-            <label>Краен срок</label>
+            <label for="task_type">Тип задача</label>
+            <select id="task_type" onchange="toggleTaskFields()">
+                <option value="WorkTask">Работна (Work)</option>
+                <option value="PersonalTask">Лична (Personal)</option>
+            </select>
+        </div>
+
+        <div class="field-group" id="deadline-group">
+            <label for="deadline">Краен срок</label>
             <input type="date" id="deadline">
         </div>
+
+        <div class="field-group" id="priority-group" style="display: none;">
+            <label for="priority">Приоритет</label>
+            <select id="priority">
+                <option value="Low">Нисък</option>
+                <option value="Medium" selected>Среден</option>
+                <option value="High">Висок</option>
+            </select>
+        </div>
+
         <button class="btn-primary" onclick="createTask()">Добави</button>
     </div>
 </div>
 
-<div class="tasks-section" style="margin-top: 30px;">
-    <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px;">📋 Списък със задачи</h3>
+<div class="tasks-section">
+    <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;">📋 Списък със задачи</h3>
     <ul class="task-list">
         {% for task in tasks %}
             <li class="task-item">
                 <div class="task-info">
-                    <strong style="display: block;">{{ task.title }}</strong>
-                    <small style="color: #64748b;">📅 Краен срок: {{ task.deadline or 'Няма' }}</small>
+                    <strong style="display: block; font-size: 1.1rem;">{{ task.title }}</strong>
+                    <small style="color: #64748b;">
+                        {% if task.type == 'WorkTask' %}
+                            📅 Краен срок: {{ task.deadline or 'Няма' }}
+                        {% else %}
+                            🎯 Приоритет: {{ task.priority or 'Нормален' }}
+                        {% endif %}
+                    </small>
                 </div>
                 <a href="/edit/{{ task.id }}" class="edit-link">✏️ Редактирай</a>
             </li>
@@ -50,9 +73,25 @@
 
 {% block scripts %}
 <script>
+function toggleTaskFields() {
+    const type = document.getElementById('task_type').value;
+    const deadlineGroup = document.getElementById('deadline-group');
+    const priorityGroup = document.getElementById('priority-group');
+
+    if (type === 'WorkTask') {
+        deadlineGroup.style.display = 'flex';
+        priorityGroup.style.display = 'none';
+    } else {
+        deadlineGroup.style.display = 'none';
+        priorityGroup.style.display = 'flex';
+    }
+}
+
 async function createTask() {
     const title = document.getElementById('title').value;
+    const task_type = document.getElementById('task_type').value;
     const deadline = document.getElementById('deadline').value;
+    const priority = document.getElementById('priority').value;
 
     if (!title) {
         alert("Моля, въведете заглавие!");
@@ -61,10 +100,10 @@ async function createTask() {
 
     const taskData = {
         title: title,
-        description: "", // Пращаме празен низ, тъй като в схемата е Optional
-        task_type: "WorkTask", // Задаваме го твърдо за момента, за да мине схемата
-        deadline: deadline || null,
-        priority: null
+        description: "",
+        task_type: task_type,
+        deadline: task_type === 'WorkTask' ? (deadline || null) : null,
+        priority: task_type === 'PersonalTask' ? priority : null
     };
 
     try {
@@ -75,13 +114,13 @@ async function createTask() {
         });
 
         if (response.ok) {
-            window.location.reload(); // Презареждаме, за да видим новата задача
+            window.location.reload();
         } else {
             const error = await response.json();
-            alert("Грешка: " + JSON.stringify(error.detail));
+            alert("Грешка: " + (error.detail || "Неуспешно създаване"));
         }
     } catch (err) {
-        console.error("Грешка при изпращане:", err);
+        console.error("Грешка:", err);
     }
 }
 </script>

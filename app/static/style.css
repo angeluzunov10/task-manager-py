@@ -87,6 +87,13 @@ footer {
     margin-bottom: 2rem;
 }
 
+.task-card h2 {
+    color: var(--primary);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+}
+
 .task-list {
     list-style: none;
     padding: 0;
@@ -158,7 +165,11 @@ input, textarea {
 
 /* Оправя разстоянието във формата */
 .form-grid {
-    gap: 20px !important; /* Това ще раздели полетата едно от друго */
+    display: grid;
+    /* Разпределяме: Заглавие(голямо), Тип(средно), Динамично поле(средно), Бутон(авто) */
+    grid-template-columns: 2fr 1.2fr 1.2fr auto;
+    gap: 15px;
+    align-items: end; /* Подравнява всичко по долната линия на полетата */
 }
 
 /* Специални корекции за формата в index.html */
@@ -182,9 +193,73 @@ input, textarea {
     padding: 0 25px !important;
 }
 
+.field-group {
+    display: flex;
+    flex-direction: column;
+}
+
 .field-group label {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: #475569;
 }
+
+.form-grid input, 
+.form-grid select, 
+.form-grid .btn-primary {
+    height: 45px;
+    margin: 0 !important;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.form-grid input:focus, 
+.form-grid select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-grid .btn-primary {
+    width: auto;
+    padding: 0 30px;
+    transition: background 0.2s;
+}
+
+/* User Nav Section */
+.user-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+.badge {
+    background: var(--primary);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 10px;
+    text-transform: uppercase;
+}
+
+/* Responsive корекция за малки екрани */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* На телефони стават един под друг */
+    }
+    .form-grid .btn-primary {
+        width: 100%;
+    }
+}
+
