@@ -42,7 +42,16 @@ def read_root(request: Request):
     
 @router.get("/edit/{task_id}", response_class=HTMLResponse)
 def edit_task_page(request: Request, task_id: int):
-    return templates.TemplateResponse("edit.html", {"request": request, "task_id": task_id})
+    try:
+        user = get_current_user(request)
+    except Exception:
+        user = None
+    
+    return templates.TemplateResponse("edit.html", {
+        "request": request, 
+        "task_id": task_id, 
+        "user": user    # ВАЖНО: предаваме user на шаблона, за да може да показваме различно съдържание в зависимост от това дали е логнат или не
+    })
 
 @router.get("/tasks", response_model=List[TaskResponse])
 def get_all_tasks():

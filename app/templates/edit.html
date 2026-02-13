@@ -1,30 +1,48 @@
 {% extends "base.html" %}
 
-{% block title %}Редактиране{% endblock %}
+{% block title %}Редактиране - {{ task_id }}{% endblock %}
 
 {% block content %}
-<div class="auth-container" style="margin-top: 2rem;"> <div class="auth-box" style="max-width: 500px;"> <h2 style="color: var(--primary); margin-bottom: 1.5rem; text-align: center;">🎯 Редактиране</h2>
+<div class="container">
+    <div class="task-card" style="max-width: 550px; margin: 2rem auto;">
+        <h2>🎯 Редактиране на задача</h2>
         
-        <div class="field-group">
-            <label style="font-weight: 600; font-size: 0.9rem;">Заглавие на задачата</label>
-            <input type="text" id="edit-title" placeholder="Име на задачата">
-        </div>
-        
-        <div class="field-group">
-            <label style="font-weight: 600; font-size: 0.9rem;">Описание / Бележки</label>
-            <textarea id="edit-desc" rows="5" placeholder="Добави детайли тук..." 
-                      style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1.2rem; font-family: inherit;"></textarea>
-        </div>
+        <div class="form-vertical">
+            <div class="field-group">
+                <label>Заглавие</label>
+                <input type="text" id="edit-title" placeholder="Име на задачата">
+            </div>
+            
+            <div class="field-group">
+                <label>Описание</label>
+                <textarea id="edit-desc" placeholder="Добави детайли тук..."></textarea>
+            </div>
 
-        <div class="action-buttons" style="display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn-primary" onclick="saveTask()">💾 Запази промените</button>
-            <button onclick="deleteTask()" 
-                    style="background: none; color: var(--danger); border: 1px solid var(--danger); padding: 0.75rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;"
-                    onmouseover="this.style.background='var(--danger)'; this.style.color='white'"
-                    onmouseout="this.style.background='none'; this.style.color='var(--danger)'">
-                🗑️ Изтрий задачата
-            </button>
-            <a href="/" style="text-align: center; text-decoration: none; color: #64748b; font-size: 0.9rem; margin-top: 10px;">Отказ и връщане</a>
+            <div class="field-group" id="edit-deadline-group" style="display: none;">
+                <label>Краен срок</label>
+                <input type="date" id="edit-deadline">
+            </div>
+
+            <div class="field-group" id="edit-priority-group" style="display: none;">
+                <label>Приоритет</label>
+                <select id="edit-priority">
+                    <option value="Low">Нисък</option>
+                    <option value="Medium">Среден</option>
+                    <option value="High">Висок</option>
+                </select>
+            </div>
+
+            <div class="action-buttons" style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn-primary" onclick="saveTask()">💾 Запази промените</button>
+                
+                <button class="btn-logout-nav" onclick="deleteTask()" style="width: 100%; height: 45px;">
+                    🗑️ Изтрий задачата
+                </button>
+                
+                <a href="/" style="text-align: center; text-decoration: none; color: #64748b; font-size: 0.9rem;">
+                    ← Отказ и връщане
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -34,6 +52,7 @@
 <script>
     //Взимаме ID-то, което Python инжектира в HTML-а
     const taskId = "{{ task_id }}";
+    let currentTaskType = "";
 
     // window.onload се изпълнява автоматично при зареждане и кодът тръгва сам
     window.onload = async function() {
@@ -43,26 +62,44 @@
             // Попълваме автоматично полетата - това е "магията", взимам данните и ги слагам в елементите със съответните ID-та(определени в HTML-а)
             document.getElementById('edit-title').value = task.title;
             document.getElementById('edit-desc').value = task.description || "";
+            currentTaskType = task.type;
+
+            // Показваме съответното поле според типа
+            if (task.type === 'WorkTask') {
+                document.getElementById('edit-deadline-group').style.display = 'block';
+                document.getElementById('edit-deadline').value = task.deadline || "";
+            } else if (task.type === 'PersonalTask') {
+                document.getElementById('edit-priority-group').style.display = 'block';
+                document.getElementById('edit-priority').value = task.priority || "Medium";
+            }
         }
     };
 
     async function saveTask() { // Функция, която се вика при натискане на бутона "Запази промените"
         const title = document.getElementById('edit-title').value; // Вземаме новите стойности от инпутите
-        const desc = document.getElementById('edit-desc').value; // Вземаме новите стойности от инпутите
+        const desc = document.getElementById('edit-desc').value;
+        const deadline = document.getElementById('edit-deadline').value;
+        const priority = document.getElementById('edit-priority').value;
+
+        const updateData = {
+            title: title,
+            description: desc,
+            deadline: currentTaskType === 'WorkTask' ? deadline : null,
+            priority: currentTaskType === 'PersonalTask' ? priority : null
+        };
 
         // Използваме PUT, защото обновяваме съществуващ ресурс
         const response = await fetch(`/tasks/${taskId}`, {  // Пращаме UPDATE заявка към нашия /tasks/{task_id} endpoint
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' }, // Казваме, че пращаме JSON
-            body: JSON.stringify({  // Тялото на заявката е JSON обект с новите данни за задачата
-                title: title,  // Новото заглавие
-                description: desc // Новото описание
-            })
+            body: JSON.stringify(updateData)// Тялото на заявката е JSON обект с новите данни за задачата
         });
 
         if (response.ok) {
             alert("Успешно обновяване!");
             window.location.href = "/"; // Пренасочване (като redirect в Django)
+        } else {
+            alert("Грешка при обновяването.");
         }
     }
 

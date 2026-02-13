@@ -263,3 +263,34 @@ input, textarea {
     }
 }
 
+/* Специален контейнер за вертикални форми (като Редакция и Вход) */
+.form-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-vertical .field-group {
+    width: 100%;
+}
+
+.form-vertical input, 
+.form-vertical select, 
+.form-vertical textarea {
+    width: 100%;
+    height: 45px;
+    padding: 10px 15px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    box-sizing: border-box; /* Важно, за да не излизат от контейнера */
+}
+
+.form-vertical textarea {
+    height: auto; /* Позволява на описанието да се разтяга */
+    min-height: 100px;
+}
+
+.form-vertical .action-buttons {
+    margin-top: 10px;
+}
