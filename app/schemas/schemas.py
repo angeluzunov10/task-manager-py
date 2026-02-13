@@ -8,7 +8,7 @@ class TaskBase(BaseModel):
 
 # Схема за създаване на задача с допълнителни полета
 class TaskCreate(TaskBase):
-    task_type: str # поле за типа на задачата (WorkTask или PersonalTask)
+    task_type: Optional[str] = "WorkTask" # поле за типа на задачата (WorkTask или PersonalTask)
     deadline: Optional[str] = None # само за WorkTask
     priority: Optional[str] = None # само за PersonalTask
 

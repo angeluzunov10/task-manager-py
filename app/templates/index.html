@@ -47,4 +47,43 @@
         {% endfor %}
     </ul>
 </div>
+
+{% block scripts %}
+<script>
+async function createTask() {
+    const title = document.getElementById('title').value;
+    const deadline = document.getElementById('deadline').value;
+
+    if (!title) {
+        alert("Моля, въведете заглавие!");
+        return;
+    }
+
+    const taskData = {
+        title: title,
+        description: "", // Пращаме празен низ, тъй като в схемата е Optional
+        task_type: "WorkTask", // Задаваме го твърдо за момента, за да мине схемата
+        deadline: deadline || null,
+        priority: null
+    };
+
+    try {
+        const response = await fetch('/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(taskData)
+        });
+
+        if (response.ok) {
+            window.location.reload(); // Презареждаме, за да видим новата задача
+        } else {
+            const error = await response.json();
+            alert("Грешка: " + JSON.stringify(error.detail));
+        }
+    } catch (err) {
+        console.error("Грешка при изпращане:", err);
+    }
+}
+</script>
+{% endblock %}
 {% endblock %}

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, Body
+from fastapi import APIRouter, Request, HTTPException, Body, Depends
 from fastapi.responses import HTMLResponse
 from typing import List
 import os
@@ -21,31 +21,25 @@ manager = TaskManager()
 
 @router.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
-    token = request.cookies.get("access_token")
-    
-    # Ако няма токен, предаваме user=None
-    if not token:
-        return templates.TemplateResponse("landing.html", {"request": request, "user": None})
+    # Преди тук вадехме токена ръчно. Вече няма нужда!
     
     try:
-        if token.startswith("Bearer "):
-            token = token.replace("Bearer ", "")
+        # Подаваме целия request обект на функцията
+        user = get_current_user(request)
         
-        user = get_current_user(token)
+        # Ако горното не хвърли грешка, значи имаме потребител
         tasks = manager.get_all_tasks() 
         
         return templates.TemplateResponse("index.html", {
             "request": request, 
             "tasks": tasks, 
-            "user": user # Тук предаваме обекта
+            "user": user 
         })
     except Exception as e:
+        # Тук влизаме, ако get_current_user вдигне HTTPException (няма токен или е невалиден)
         print(f"Auth error: {e}")
-        # При грешка също предаваме user=None
-        response = templates.TemplateResponse("landing.html", {"request": request, "user": None})
-        response.delete_cookie("access_token")
-        return response
-
+        return templates.TemplateResponse("landing.html", {"request": request, "user": None})
+    
 @router.get("/edit/{task_id}", response_class=HTMLResponse)
 def edit_task_page(request: Request, task_id: int):
     return templates.TemplateResponse("edit.html", {"request": request, "task_id": task_id})
@@ -62,7 +56,7 @@ def get_task(task_id: int):
     return task
 
 @router.post("/tasks", response_model=TaskResponse)
-def create_task(task_data: TaskCreate):
+def create_task(task_data: TaskCreate, user=Depends(get_current_user)):
     if task_data.deadline:
         new_task = models.WorkTask(
             title=task_data.title,

@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from fastapi import HTTPException, Depends, status
+from fastapi import HTTPException, Depends, Request, status
 from jose import jwt, JWTError
 import os
 from app.models.models import User, UserRole
@@ -12,8 +12,21 @@ ALGORITHM = os.getenv("ALGORITHM")
 
 manager = TaskManager()
 
-def get_current_user(token: str):
-    # Валидира JWT токена и връща текущия потребител 
+def get_current_user(request: Request):  # Вече приема целия Request обект
+    # 1. Взимаме токена директно от бисквитките на браузъра
+    token = request.cookies.get("access_token")
+    
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Не сте влезли в профила си"
+        )
+
+    # 2. Махаме "Bearer ", ако присъства в бисквитката
+    if token.startswith("Bearer "):
+        token = token.replace("Bearer ", "")
+
+    # 3. Валидираме JWT токена
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -22,6 +35,7 @@ def get_current_user(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
 
+    # 4. Намираме потребителя в базата
     user = manager.db.query(User).filter(User.username == username).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
