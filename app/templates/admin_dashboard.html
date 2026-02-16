@@ -1,24 +1,234 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager Admin Panel</title>
+    <style>
+        :root {
+            --hacker-green: #00ff41;
+            --dark-bg: #0d0208;
+            --matrix-dim: #003b00;
+            --border-glow: 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--hacker-green);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            border-bottom: 2px solid var(--hacker-green);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--border-glow);
+        }
+
+        h1, h2 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+
+        .status-bar {
+            background: var(--matrix-dim);
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .container {
+            display: grid;
+            gap: 30px;
+        }
+
+        section {
+            border: 1px solid var(--hacker-green);
+            padding: 20px;
+            background: rgba(0, 59, 0, 0.1);
+            position: relative;
+        }
+
+        section::before {
+            content: "[ ACCESS_RESTRICTED ]";
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: var(--dark-bg);
+            font-size: 0.7rem;
+            padding: 0 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid var(--matrix-dim);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: var(--matrix-dim);
+            color: var(--hacker-green);
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background: rgba(0, 255, 65, 0.05);
+        }
+
+        /* Форми и Бутони */
+        select, button {
+            background: var(--dark-bg);
+            color: var(--hacker-green);
+            border: 1px solid var(--hacker-green);
+            padding: 5px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        select:focus, button:hover {
+            background: var(--hacker-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 15px var(--hacker-green);
+        }
+
+        .btn-delete {
+            border-color: #ff003c;
+            color: #ff003c;
+        }
+
+        .btn-delete:hover {
+            background: #ff003c;
+            color: white;
+            box-shadow: 0 0 15px #ff003c;
+        }
+
+        nav a {
+            color: var(--hacker-green);
+            text-decoration: none;
+            margin-right: 20px;
+            border: 1px solid var(--hacker-green);
+            padding: 5px 10px;
+        }
+
+        nav a:hover {
+            background: var(--hacker-green);
+            color: var(--dark-bg);
+        }
+
+        .id-badge {
+            color: #888;
+            font-size: 0.8rem;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Админ Панел</h1>
-        <p>Добре дошъл, <strong>{{ user.username }}</strong>! Ти си с роля: <em>{{ user.role }}</em></p>
-    </header>
-    
-    <main>
-        <section>
-            <h2>Управление на системата</h2>
-            <ul>
-                <li><a href="/">Към началната страница</a></li>
-                <li><a href="/logout">Изход</a></li>
-            </ul>
-        </section>
-    </main>
+
+<header>
+    <h1>> ADMIN_PANEL_ROOT</h1>
+    <div class="status-bar">
+        <span>USER: {{ user.username }}</span>
+        <span>ROLE: {{ user.role }}</span>
+        <span>SYSTEM: ACTIVE</span>
+    </div>
+    <nav style="margin-top: 20px;">
+        <a href="/">[ ВЪРНИ СЕ В СИСТЕМАТА ]</a>
+        <a href="/logout">[ ИЗХОД ]</a>
+    </nav>
+</header>
+
+<div class="container">
+    <section>
+        <h2>// Списък_Потребители</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ПОТРЕБИТЕЛ</th>
+                    <th>РОЛЯ</th>
+                    <th>ДЕЙСТВИЕ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td class="id-badge">#{{ u.id }}</td>
+                    <td>{{ u.username }}</td>
+                    <td>
+                        <form action="/admin/user/{{ u.id }}/role" method="POST">
+                            <select name="new_role" onchange="this.form.submit()" {% if u.id == 1 %}disabled{% endif %}>
+                                <option value="user" {% if u.role == 'user' %}selected{% endif %}>USER</option>
+                                <option value="editor" {% if u.role == 'editor' %}selected{% endif %}>EDITOR</option>
+                                <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>ADMIN</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                        {% if u.id != 1 %}
+                        <form action="/admin/user/{{ u.id }}/delete" method="POST">
+                            <button type="submit" class="btn-delete">DELETE_USER</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>// Списък_Задачи</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ЗАГЛАВИЕ</th>
+                    <th>СЪЗДАДЕНА_НА</th>
+                    <th>СЪЗДАТЕЛ</th>
+                    <th>КОНТРОЛ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tasks %}
+                <tr>
+                    <td class="id-badge">{{ t.id }}</td>
+                    <td>{{ t.title }}</td>
+                    <td>{{ t.created_at.strftime('%Y-%m-%d %T') if t.created_at else 'N/A' }}</td>
+                    <td>{{ t.owner.username if t.owner else 'SYSTEM' }}</td>
+                    <td>
+                        <button data-id="{{ t.id }}" onclick="deleteTaskFromAdmin(this)" class="btn-delete">WIPE_DATA</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+
+<script>
+async function deleteTaskFromAdmin(button) {
+    const id = button.getAttribute('data-id');
+    if(confirm('ПОТВЪРДЕТЕ ИЗТРИВАНЕ НА ОБЕКТ #' + id)) {
+        const res = await fetch(`/tasks/${id}`, { method: 'DELETE' });
+        if(res.ok) {
+            location.reload();
+        } else {
+            alert('ГРЕШКА: ДОСТЪПЪТ ОТКАЗАН');
+        }
+    }
+}
+</script>
+
 </body>
 </html>

@@ -53,3 +53,8 @@ class RoleChecker:
                 detail="You do not have the required permissions"
             )
         return user
+    
+def get_admin_user(user: User = Depends(get_current_user)):
+    if user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Достъпът е забранен. Изискват се администраторски права.")
+    return user

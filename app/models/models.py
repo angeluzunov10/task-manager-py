@@ -1,5 +1,7 @@
+import datetime
 import enum
-from sqlalchemy import Column, Integer, String, ForeignKey
+from datetime import datetime, timezone
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
 from app.database import Base
 from sqlalchemy.orm import relationship # за връзки между обектите/таблиците
 
@@ -12,6 +14,7 @@ class BaseTask(Base): # наследяваме от Base, който е в datab
     owner_id = Column(Integer, ForeignKey("users.id")) # Това е външен ключ, който сочи към id-то в таблицата users
     status = Column(String, default='Pending') # сменяме го така, защото вече не е private променлива, а SQLAlchemy колонка
     type = Column(String) # за да различаваме типовете задачи (WorkTask, PersonalTask)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc)) # добавяме поле за дата на създаване на задачата
 
     # Специфични полета за наследниците
     deadline = Column(String, nullable=True)

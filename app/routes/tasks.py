@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, Body, Depends
+from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import HTMLResponse
 from typing import List
 import os
