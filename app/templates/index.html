@@ -65,7 +65,9 @@
                         {% endif %}
                     </small>
                 </div>
-                <a href="/edit/{{ task.id }}" class="edit-link">✏️ Редактирай</a>
+                {% if user.role == "admin" or (task.type == "PersonalTask" and task.owner_id == user.id) %}
+                    <a href="/edit/{{ task.id }}" class="edit-link">✏️ Редактирай</a>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>

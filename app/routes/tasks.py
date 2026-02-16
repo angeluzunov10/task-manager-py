@@ -48,16 +48,29 @@ def read_root(request: Request):
     
 @router.get("/edit/{task_id}", response_class=HTMLResponse)
 def edit_task_page(request: Request, task_id: int):
-    try:
-        user = get_current_user(request)
-    except Exception:
-        user = None
+    user = get_current_user(request)
+    task = manager.get_task_by_id(task_id)
+
+    if not task:
+        raise HTTPException(status_code=404, detail="Задачата не е намерена")
+    
+    # ЛОГИКА ЗА ДОСТЪП:
+    # 1. Администратор може всичко.
+    # 2. Потребител може да редактира САМО своите PersonalTask.
+    can_edit = (
+        user.role == "admin" or 
+        (task.type == "PersonalTask" and task.owner_id == user.id)
+    )
+
+    if not can_edit:
+        raise HTTPException(status_code=403, detail="Нямате права да редактирате тази задача")
     
     return templates.TemplateResponse("edit.html", {
-        "request": request, 
-        "task_id": task_id, 
-        "user": user    # ВАЖНО: предаваме user на шаблона, за да може да показваме различно съдържание в зависимост от това дали е логнат или не
+        "request": request,
+        "task_id": task.id,
+        "user": user
     })
+
 
 @router.get("/tasks", response_model=List[TaskResponse])
 def get_all_tasks():
@@ -98,17 +111,26 @@ def create_task(task_data: TaskCreate, user=Depends(get_current_user)):
     return new_task
 
 @router.delete("/tasks/{task_id}")
-def delete_task(task_id: int):
-    success = manager.delete_task_by_id(task_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return {"status": "deleted", "id": task_id}
-
-@router.put("/tasks/{task_id}", response_model=TaskResponse)
-def update_task(task_id: int, task_update: TaskUpdate):
+def delete_task(task_id: int, user=Depends(get_current_user)):
     task = manager.get_task_by_id(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+    
+    if not (user.role == "admin" or (task.type == "PersonalTask" and task.owner_id == user.id)):
+        raise HTTPException(status_code=403, detail="Нямате права за изтриване на тази задача")
+    
+    manager.delete_task(task)
+    manager.db.commit()
+    return {"status": "deleted", "id": task_id}
+
+@router.put("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, task_update: TaskUpdate, user=Depends(get_current_user)):
+    task = manager.get_task_by_id(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    if not (user.role == "admin" or (task.type == "PersonalTask" and task.owner_id == user.id)):
+        raise HTTPException(status_code=403, detail="Нямате права за промяна на тази задача")
     
     update_data = task_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
