@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block extra_styles %}
+<style>
+    /* Центрираме картата за автентикация точно в средата на екрана */
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh; /* Заемаме 80% от височината на екрана */
+    }
+
+    .auth-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px; /* Фиксирана ширина за по-добър вид */
+        border: 1px solid #e2e8f0;
+    }
+
+    .auth-card h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #1e293b;
+    }
+
+    /* Специфични стилове за формите в тези карти */
+    .auth-form .field-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .auth-form input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .auth-form input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        {% block auth_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

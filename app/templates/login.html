@@ -1,5 +1,20 @@
 {% extends "auth_base.html" %}
+
+{% block title %}Вход - Task Manager{% endblock %}
+
 {% block auth_title %}Вход в системата{% endblock %}
+
+{% block auth_form_content %}
+    <div class="field-group">
+        <label>Потребителско име</label>
+        <input type="text" id="username" required placeholder="Въведи име...">
+    </div>
+    <div class="field-group">
+        <label>Парола</label>
+        <input type="password" id="password" required placeholder="Въведи парола...">
+    </div>
+{% endblock %}
+
 {% block btn_text %}Влез{% endblock %}
 
 {% block auth_footer %}
