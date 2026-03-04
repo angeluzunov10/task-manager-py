@@ -21,6 +21,7 @@
             <div class="field-group" id="edit-deadline-group" style="display: none;">
                 <label>Краен срок</label>
                 <input type="date" id="edit-deadline">
+                <small id="old-deadline-info" style="color: #64748b;"></small>
             </div>
 
             <div class="field-group" id="edit-priority-group" style="display: none;">
@@ -33,9 +34,9 @@
             </div>
 
             <div class="action-buttons" style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="btn-primary" onclick="saveTask()">💾 Запази промените</button>
+                <button id="save-btn" class="btn-primary" onclick="saveTask()">💾 Запази промените</button>
                 
-                <button class="btn-logout-nav" onclick="deleteTask()" style="width: 100%; height: 45px;">
+                <button id="delete-btn" class="btn-logout-nav" onclick="deleteTask()" style="width: 100%; height: 45px;">
                     🗑️ Изтрий задачата
                 </button>
                 
@@ -50,30 +51,52 @@
 
 {% block scripts %}
 <script>
-    //Взимаме ID-то, което Python инжектира в HTML-а
-    const taskId = "{{ task_id }}";
+    const taskId = "{{ task_id }}"; //Взимаме ID-то, което Python инжектира в HTML-а
+    const userRole = "{{ user.role.lower() if user else 'user' }}"; // Взимаме ролята на потребителя от base.html, за да можем да правим проверки в JavaScript-а
     let currentTaskType = "";
 
-    // window.onload се изпълнява автоматично при зареждане и кодът тръгва сам
-    window.onload = async function() {
-        const response = await fetch(`/tasks/${taskId}`); // Вземаме данните за задачата със съответното ID от сървъра
-        if (response.ok) { // Ако всичко е минало добре
-            const task = await response.json(); // Вземаме данните на задачата като JSON
-            // Попълваме автоматично полетата - това е "магията", взимам данните и ги слагам в елементите със съответните ID-та(определени в HTML-а)
-            document.getElementById('edit-title').value = task.title;
-            document.getElementById('edit-desc').value = task.description || "";
-            currentTaskType = task.type;
+    // window.onload се изпълнява автоматично при зареждане и кодът тръгва сам,
+    // докато DOMContentLoaded се изпълнява, когато целият HTML е зареден, 
+    // но преди да са заредени изображенията и другите ресурси. 
+    // Това е по-добре за нашия случай, защото ние работим с елементи от DOM-а
+    // и не ни трябва чакането на всички ресурси.
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch(`/tasks/${taskId}`); // Вземаме данните за задачата със съответното ID от сървъра
+            if (response.ok) { // Ако всичко е минало добре
+                const task = await response.json(); // Вземаме данните на задачата като JSON
+                // Попълваме автоматично полетата - това е "магията", взимам данните и ги слагам в елементите със съответните ID-та(определени в HTML-а)
+                document.getElementById('edit-title').value = task.title;
+                document.getElementById('edit-desc').value = task.description || "";
+                currentTaskType = task.type;
 
-            // Показваме съответното поле според типа
-            if (task.type === 'WorkTask') {
-                document.getElementById('edit-deadline-group').style.display = 'block';
-                document.getElementById('edit-deadline').value = task.deadline || "";
-            } else if (task.type === 'PersonalTask') {
-                document.getElementById('edit-priority-group').style.display = 'block';
-                document.getElementById('edit-priority').value = task.priority || "Medium";
+                if (task.type === 'WorkTask' && userRole !== 'admin') {
+                    document.getElementById('save-btn').disabled = true;
+                    document.getElementById('save-btn').innerText = "🔒 Само за Админи";
+                    document.getElementById('delete-btn').style.display = 'none';
+                    document.getElementById('edit-title').readOnly = true;
+                    document.getElementById('edit-desc').readOnly = true;
+                }
+
+                // Показваме съответното поле според типа
+                if (task.type === 'WorkTask') {
+                    document.getElementById('edit-deadline-group').style.display = 'block';
+                    if (task.deadline) {
+                        const dateOnly = task.deadline.split('T')[0]; // Вземаме само датата до 10 символ, за да е във формат YYYY-MM-DD, който е подходящ за input type="date"
+                        document.getElementById('edit-deadline').value = dateOnly;
+                        document.getElementById('old-deadline-info').innerText = 'Текущ срок: ${dateOnly}'; // Съхраняваме старата стойност в скрито поле, за да я изпратим при обновяване, ако потребителят не я промени
+                    }
+                } else if (task.type === 'PersonalTask') {
+                    document.getElementById('edit-priority-group').style.display = 'block';
+                    if (task.priority) {
+                        document.getElementById('edit-priority').value = task.priority;
+                    }
+                }
             }
+        } catch (err) {
+            console.error("Грешка при зареждането на задачата:", err);
         }
-    };
+    });
 
     async function saveTask() { // Функция, която се вика при натискане на бутона "Запази промените"
         const title = document.getElementById('edit-title').value; // Вземаме новите стойности от инпутите
@@ -99,7 +122,8 @@
             alert("Успешно обновяване!");
             window.location.href = "/"; // Пренасочване (като redirect в Django)
         } else {
-            alert("Грешка при обновяването.");
+            const err = await response.json();
+            alert("Грешка: " + (err.error || "Неуспешно обновяване."));
         }
     }
 
