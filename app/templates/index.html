@@ -52,6 +52,11 @@
 
 <div class="tasks-section">
     <h3 style="border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;">📋 Списък със задачи</h3>
+    <div class="search-container" style="margin-bottom: 20px;">
+        <input type="text" id="taskSearch" placeholder="🔍 Търси задача по заглавие..." 
+            onkeyup="filterTasks()" 
+            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+    </div>
     <ul class="task-list">
         {% for task in tasks %}
             <li class="task-item">
@@ -176,6 +181,24 @@ function closeModalOutside(event) {
     const modal = document.getElementById('taskModal');
     if (event.target === modal) {
         closeModal();
+    }
+}
+
+function filterTasks() {
+    const input = document.getElementById('taskSearch');
+    const filter = input.value.toLowerCase();
+    const taskList = document.querySelector('.task-list');
+    const tasks = taskList.getElementsByTagName('li');
+
+    for (let i = 0; i < tasks.length; i++) {
+        // Взимаме заглавието от <strong> тага вътре в li
+        const title = tasks[i].querySelector('.task-title').innerText;
+        
+        if (title.toLowerCase().indexOf(filter) > -1) {
+            tasks[i].style.display = ""; // Показваме го
+        } else {
+            tasks[i].style.display = "none"; // Скриваме го
+        }
     }
 }
 </script>
