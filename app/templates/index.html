@@ -56,7 +56,12 @@
         {% for task in tasks %}
             <li class="task-item">
                 <div class="task-info">
-                    <strong style="display: block; font-size: 1.1rem;">{{ task.title }}</strong>
+                    <strong data-id="{{ task.id }}" 
+                            onclick="showDetails(this.getAttribute('data-id'))"
+                            style="display: block; font-size: 1.1rem; cursor: pointer; color: var(--primary);"
+                            class="task-title">
+                        {{ task.title }}
+                    </strong>
                     <small style="color: #64748b;">
                         {% if task.type == 'WorkTask' %}
                             📅 Краен срок: {{ task.deadline or 'Няма' }}
@@ -71,6 +76,15 @@
             </li>
         {% endfor %}
     </ul>
+</div>
+
+<div id="taskModal" class="modal" onclick="closeModalOutside(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modal-title" style="margin-top: 0;"></h2>
+        <p id="modal-desc" style="line-height: 1.6; color: #334155;"></p>
+        <div id="modal-meta"></div>
+    </div>
 </div>
 
 {% block scripts %}
@@ -123,6 +137,45 @@ async function createTask() {
         }
     } catch (err) {
         console.error("Грешка:", err);
+    }
+}
+
+async function showDetails(id) {
+    try {
+        const response = await fetch(`/tasks/${id}`);
+        if (!response.ok) throw new Error("Задачата не е намерена");
+        
+        const task = await response.json();
+        
+        document.getElementById('modal-title').innerText = task.title;
+        document.getElementById('modal-desc').innerText = task.description || "Няма описание.";
+        
+        let meta = `<strong>Тип:</strong> ${task.type === 'WorkTask' ? '💼 Служебна' : '👤 Лична'}<br>`;
+        if (task.type === 'WorkTask') {
+            meta += `<strong>Срок:</strong> ${task.deadline ? task.deadline.split('T')[0] : 'Няма'}`;
+        } else {
+            meta += `<strong>Приоритет:</strong> ${task.priority || 'Нормален'}`;
+        }
+        
+        document.getElementById('modal-meta').innerHTML = meta;
+        
+        // Показваме модала като flex, за да работи центрирането от CSS-а
+        document.getElementById('taskModal').style.display = "flex";
+    } catch (err) {
+        console.error("Грешка при показване на детайли:", err);
+        alert("Грешка при зареждане на данните.");
+    }
+}
+
+function closeModal() {
+    document.getElementById('taskModal').style.display = 'none';
+}
+
+// Функцията за затваряне при клик извън прозореца
+function closeModalOutside(event) {
+    const modal = document.getElementById('taskModal');
+    if (event.target === modal) {
+        closeModal();
     }
 }
 </script>
