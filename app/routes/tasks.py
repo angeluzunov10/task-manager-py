@@ -139,3 +139,17 @@ def update_task(task_id: int, task_update: TaskUpdate, user=Depends(get_current_
     manager.db.commit()
     manager.db.refresh(task)
     return task
+
+@router.patch("/tasks/{task_id}/toggle")
+def toggle_task_status(task_id: int, user=Depends(get_current_user)):
+    task = manager.get_task_by_id(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Проверка на правата (само администратор или собственик може да променя статуса)
+    if not (user.role == "admin" or task.owner_id == user.id):
+        raise HTTPException(status_code=403, detail="Нямате права за промяна на статуса на тази задача")
+    
+    task.is_completed = not task.is_completed
+    manager.db.commit()
+    return {"is_completed": task.is_completed}

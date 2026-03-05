@@ -40,9 +40,9 @@
         <div class="field-group" id="priority-group" style="display: none;">
             <label for="priority">Приоритет</label>
             <select id="priority">
-                <option value="Low">Нисък</option>
-                <option value="Medium" selected>Среден</option>
-                <option value="High">Висок</option>
+                <option value="Нисък">Нисък</option>
+                <option value="Среден" selected>Среден</option>
+                <option value="Висок">Висок</option>
             </select>
         </div>
 
@@ -57,28 +57,45 @@
             onkeyup="filterTasks()" 
             style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
     </div>
-    <ul class="task-list">
+    <div class="search-container" style="margin-bottom: 20px;">
+        <input type="text" id="taskSearch" placeholder="🔍 Търси задача по заглавие..." 
+            onkeyup="filterTasks()" 
+            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+    </div>
+    <ul class="task-list" id="main-task-list">
         {% for task in tasks %}
-            <li class="task-item">
-                <div class="task-info">
-                    <strong data-id="{{ task.id }}" 
-                            onclick="showDetails(this.getAttribute('data-id'))"
-                            style="display: block; font-size: 1.1rem; cursor: pointer; color: var(--primary);"
-                            class="task-title">
-                        {{ task.title }}
-                    </strong>
-                    <small style="color: #64748b;">
-                        {% if task.type == 'WorkTask' %}
-                            📅 Краен срок: {{ task.deadline or 'Няма' }}
-                        {% else %}
-                            🎯 Приоритет: {{ task.priority or 'Нормален' }}
-                        {% endif %}
-                    </small>
+            <li class="task-item {{ 'completed' if task.is_completed }}" id="task-row-{{ task.id }}">
+                <div class="task-info" style="display: flex; align-items: center;">
+                    <span class="check-btn" onclick="toggleComplete({{ task.id }})">
+                        {{ '✅' if task.is_completed else '⚪' }}
+                    </span>
+
+                    <div>
+                        <strong data-id="{{ task.id }}" 
+                                onclick="showDetails(this.getAttribute('data-id'))"
+                                style="display: block; font-size: 1.1rem; cursor: pointer; color: var(--primary);"
+                                class="task-title">
+                            {{ task.title }}
+                        </strong>
+                        <small style="color: #64748b;">
+                            {% if task.type == 'WorkTask' %}
+                                📅 Краен срок: {{ task.deadline if task.deadline else 'Няма зададен' }}
+                            {% elif task.type == 'PersonalTask' %}
+                                🎯 Приоритет: {{ task.priority if task.priority else 'Нормален' }}
+                            {% endif %}
+                        </small>
+                    </div>
+
                 </div>
                 {% if user.role == "admin" or (task.type == "PersonalTask" and task.owner_id == user.id) %}
                     <a href="/edit/{{ task.id }}" class="edit-link">✏️ Редактирай</a>
                 {% endif %}
             </li>
+        {% else %}
+            <div class="empty-state">
+                <span class="empty-state-icon">☕</span>
+                <p>Всичко е готово! Няма активни задачи. Време е за почивка!</p>
+            </div>
         {% endfor %}
     </ul>
 </div>
@@ -151,13 +168,15 @@ async function showDetails(id) {
         if (!response.ok) throw new Error("Задачата не е намерена");
         
         const task = await response.json();
+        console.log(task)
         
         document.getElementById('modal-title').innerText = task.title;
         document.getElementById('modal-desc').innerText = task.description || "Няма описание.";
         
         let meta = `<strong>Тип:</strong> ${task.type === 'WorkTask' ? '💼 Служебна' : '👤 Лична'}<br>`;
         if (task.type === 'WorkTask') {
-            meta += `<strong>Срок:</strong> ${task.deadline ? task.deadline.split('T')[0] : 'Няма'}`;
+            const deadlineValue = task.deadline || 'Няма зададен срок';
+            meta += `<strong>Срок:</strong> ${deadlineValue.includes('T') ? deadlineValue.split('T')[0] : deadlineValue}`;
         } else {
             meta += `<strong>Приоритет:</strong> ${task.priority || 'Нормален'}`;
         }
@@ -201,6 +220,29 @@ function filterTasks() {
         }
     }
 }
+
+async function toggleComplete(id) {
+    try {
+        const response = await fetch(`/tasks/${id}/toggle`, {method: 'PATCH'});
+        if (response.ok) {
+            const data = await response.json();
+            const row = document.getElementById(`task-row-${id}`);
+            const checkBtn = row.querySelector('.check-btn');
+
+            // Променяме иконата в зависимост от статуса
+            if (data.is_completed) {
+                checkBtn.innerText = '✅';
+                row.classList.add('completed');
+            } else {
+                checkBtn.innerText = '⚪';
+                row.classList.remove('completed');
+            }
+        }
+    } catch (err) {
+        console.error("Грешка при обновяване:", err);
+    }
+}
+
 </script>
 {% endblock %}
 {% endblock %}

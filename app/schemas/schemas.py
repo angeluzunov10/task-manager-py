@@ -17,6 +17,9 @@ class TaskResponse(TaskBase):
     id: int
     status: str
     type: str
+    is_completed: bool
+    deadline: Optional[str] = None
+    priority: Optional[str] = None
 
     class Config:
         from_attributes = True # позволява на Pydantic да създава обекти чрез SQLAlchemy модели
