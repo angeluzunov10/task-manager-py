@@ -1,7 +1,7 @@
 import datetime
 import enum
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Boolean
 from app.database import Base
 from sqlalchemy.orm import relationship # за връзки между обектите/таблиците
 
@@ -15,6 +15,7 @@ class BaseTask(Base): # наследяваме от Base, който е в datab
     status = Column(String, default='Pending') # сменяме го така, защото вече не е private променлива, а SQLAlchemy колонка
     type = Column(String) # за да различаваме типовете задачи (WorkTask, PersonalTask)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc)) # добавяме поле за дата на създаване на задачата
+    is_completed = Column(Boolean, default=False) # добавяме поле за статус на задачата (дали е завършена или не)
 
     # Специфични полета за наследниците
     deadline = Column(String, nullable=True)
@@ -71,7 +72,10 @@ class BaseTask(Base): # наследяваме от Base, който е в datab
             'description': self.description,
             # 'status': self.get_status(), # това е private променлива, затова използваме метода get_status()
             'status': self.status, # сменяме го така, защото вече не е private променлива, а SQLAlchemy колонка
-            'type': self.type if self.type else self.__class__.__name__ # връща името на класа, тоест дали е WorkTask или PersonalTask
+            'type': self.type if self.type else self.__class__.__name__, # връща името на класа, тоест дали е WorkTask или PersonalTask
+            'is_completed': self.is_completed,
+            'deadline': self.deadline,
+            'priority': self.priority
         }
 
     def __str__(self):

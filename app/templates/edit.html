@@ -27,9 +27,9 @@
             <div class="field-group" id="edit-priority-group" style="display: none;">
                 <label>Приоритет</label>
                 <select id="edit-priority">
-                    <option value="Low">Нисък</option>
-                    <option value="Medium">Среден</option>
-                    <option value="High">Висок</option>
+                    <option value="Нисък">Нисък</option>
+                    <option value="Среден">Среден</option>
+                    <option value="Висок">Висок</option>
                 </select>
             </div>
 
@@ -84,7 +84,7 @@
                     if (task.deadline) {
                         const dateOnly = task.deadline.split('T')[0]; // Вземаме само датата до 10 символ, за да е във формат YYYY-MM-DD, който е подходящ за input type="date"
                         document.getElementById('edit-deadline').value = dateOnly;
-                        document.getElementById('old-deadline-info').innerText = 'Текущ срок: ${dateOnly}'; // Съхраняваме старата стойност в скрито поле, за да я изпратим при обновяване, ако потребителят не я промени
+                        document.getElementById('old-deadline-info').innerText = `Текущ срок: ${dateOnly}`; // Съхраняваме старата стойност в скрито поле, за да я изпратим при обновяване, ако потребителят не я промени
                     }
                 } else if (task.type === 'PersonalTask') {
                     document.getElementById('edit-priority-group').style.display = 'block';
