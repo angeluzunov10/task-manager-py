@@ -57,11 +57,6 @@
             onkeyup="filterTasks()" 
             style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
     </div>
-    <div class="search-container" style="margin-bottom: 20px;">
-        <input type="text" id="taskSearch" placeholder="🔍 Търси задача по заглавие..." 
-            onkeyup="filterTasks()" 
-            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-    </div>
     <ul class="task-list" id="main-task-list">
         {% for task in tasks %}
             <li class="task-item {{ 'completed' if task.is_completed }}" id="task-row-{{ task.id }}">

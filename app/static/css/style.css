@@ -9,6 +9,15 @@
     --border: #e2e8f0;
 }
 
+/* Стойности за Тъмна тема */
+body.dark-mode {
+    --bg: #0f172a; 
+    --text: #f1f5f9;
+    --white: #1e293b;
+    --border: #334155;
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg);
@@ -18,7 +27,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    margin: 0;
+    transition: background-color 0.3s, color 0.3s; /*Плавен преход между темите */
 }
 
 main.container {
@@ -45,6 +54,7 @@ footer {
     padding: 1rem 0;
     box-shadow: var(--shadow);
     margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
 }
 
 .nav-wrapper {
@@ -58,10 +68,17 @@ footer {
     text-decoration: none;
     color: var(--text);
     font-size: 0.95rem;
+    transition: color 0.2s;
 }
 
 .nav-link:hover {
     color: var(--primary);
+}
+
+.logo-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .logo {
@@ -80,7 +97,6 @@ footer {
 
 /* Task Cards & List */
 .task-card {
-    background: var(--white);
     padding: 2rem;
     border-radius: 12px;
     box-shadow: var(--shadow);
@@ -100,15 +116,13 @@ footer {
 }
 
 .task-item {
-    background: var(--white);
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 0.8rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid var(--border);
-    transition: transform 0.2s;
+    transition: transform 0.2s, border-color 0.2s;
 }
 
 .task-item:hover {
@@ -117,13 +131,14 @@ footer {
 }
 
 /* Forms & Inputs */
-input, textarea {
-    width: 100%;
-    padding: 0.75rem;
-    margin: 0.5rem 0 1rem 0;
+input, textarea, select {
+    background-color: var(--white); /* Полетата също стават тъмни */
+    color: var(--text);
     border: 1px solid var(--border);
-    border-radius: 6px;
-    font-family: inherit;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .btn-primary {
@@ -134,7 +149,7 @@ input, textarea {
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    width: 100%; /* Бутоните във формите са цели */
+    transition: background 0.2s;
 }
 
 .btn-primary:hover { background: var(--primary-hover); }
@@ -334,7 +349,7 @@ input, textarea {
     top: 1rem;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #64748b;
+    color: var(--text);
     transition: color 0.2s;
 }
 
@@ -385,4 +400,80 @@ input, textarea {
 
 .check-btn:hover {
     transform: scale(1.2);
+}
+
+/* Dark Mode */
+/* Контейнер за подравняване в navbar */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mode-icon {
+    font-size: 1.1rem;
+    user-select: none;
+}
+
+/* Самият плъзгач */
+.theme-switch {
+    display: inline-block;
+    height: 24px;
+    position: relative;
+    width: 48px;
+}
+
+.theme-switch input {
+    display: none; /* Скриваме стандартния чекбокс */
+}
+
+/* Фонът на плъзгача */
+.slider {
+    background-color: #ccc;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+/* Кръгчето вътре */
+.slider:before {
+    background-color: #fff;
+    bottom: 4px;
+    content: "";
+    height: 16px;
+    left: 4px;
+    position: absolute;
+    transition: .4s;
+    width: 16px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Когато е включен (Dark Mode) */
+input:checked + .slider {
+    background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+.task-card, .task-item, .modal-content, .user-nav, footer {
+    background: var(--white); /* Вече реагира на dark-mode */
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+/* Закръгляне */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
 }
