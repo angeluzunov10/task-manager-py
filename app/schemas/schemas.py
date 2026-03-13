@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 # Базова схема със споделени полета
@@ -21,8 +21,7 @@ class TaskResponse(TaskBase):
     deadline: Optional[str] = None
     priority: Optional[str] = None
 
-    class Config:
-        from_attributes = True # позволява на Pydantic да създава обекти чрез SQLAlchemy модели
+    model_config = ConfigDict(from_attributes=True) # позволява на Pydantic да създава обекти чрез SQLAlchemy модели
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
@@ -40,5 +39,4 @@ class UserResponse(BaseModel):
     id: int
     username: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

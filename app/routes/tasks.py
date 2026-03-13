@@ -36,15 +36,12 @@ def read_root(request: Request):
             (models.BaseTask.owner_id == user.id)
         ).all()
         
-        return templates.TemplateResponse("index.html", {
-            "request": request, 
-            "tasks": tasks, 
-            "user": user 
-        })
+        return templates.TemplateResponse(request, "index.html", {"tasks": tasks, "user": user})
+
     except Exception as e:
         # Тук влизаме, ако get_current_user вдигне HTTPException (няма токен или е невалиден)
         print(f"Auth error: {e}")
-        return templates.TemplateResponse("landing.html", {"request": request, "user": None})
+        return templates.TemplateResponse(request, "landing.html", {"user": None})
     
 @router.get("/edit/{task_id}", response_class=HTMLResponse)
 def edit_task_page(request: Request, task_id: int):
@@ -65,11 +62,7 @@ def edit_task_page(request: Request, task_id: int):
     if not can_edit:
         raise HTTPException(status_code=403, detail="Нямате права да редактирате тази задача")
     
-    return templates.TemplateResponse("edit.html", {
-        "request": request,
-        "task_id": task.id,
-        "user": user
-    })
+    return templates.TemplateResponse(request, "edit.html", {"task_id": task.id, "user": user})
 
 
 @router.get("/tasks", response_model=List[TaskResponse])
