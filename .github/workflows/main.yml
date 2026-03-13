@@ -26,5 +26,8 @@ jobs:
         pip install pytest httpx
 
     - name: Run tests
+      env:
+        ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+        SECRET_KEY: "test_secret_key_for_ci"
       run: |
         python -m pytest
