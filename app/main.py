@@ -1,12 +1,22 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from app.routes import tasks, auth, admin
 import app.models.models as models
 from app.database import engine
 import os
 
+class HTTPSRedirectMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # Казваме на FastAPI да генерира линковете с https
+        request.scope["scheme"] = "https"
+        response = await call_next(request)
+        return response
+
 app = FastAPI(title="Task Master Pro")
+app.add_middleware(HTTPSRedirectMiddleware)  # Принуждаваме HTTPS за по-голяма сигурност
 
 # Създаваме таблиците
 models.Base.metadata.create_all(bind=engine)
