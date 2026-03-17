@@ -14,6 +14,12 @@ auth.create_initial_admin()
 
 # Пътища
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(BASE_DIR, "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+else:
+    print("WARNING: Static directory not found!")
+
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 # ВКЛЮЧВАМЕ РУТЕРИТЕ (Магията на APIRouter)
