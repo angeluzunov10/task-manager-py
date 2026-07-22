@@ -16,18 +16,15 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 app = FastAPI(title="Task Master Pro")
 
+# HTTPS Middleware – активира се САМО в production (напр. в облака), така кода ще ми работи и в development среда без да се налага да имам валиден SSL сертификат локално.
 if ENVIRONMENT == "production":
-
     class HTTPSRedirectMiddleware(BaseHTTPMiddleware):
         async def dispatch(self, request, call_next):
-            # Казваме на FastAPI да генерира линковете с https
             request.scope["scheme"] = "https"
             response = await call_next(request)
-
             return response
 
-    app.add_middleware(HTTPSRedirectMiddleware)  # Принуждаваме HTTPS за по-голяма сигурност
-
+    app.add_middleware(HTTPSRedirectMiddleware)
 
 # Създаваме таблиците
 models.Base.metadata.create_all(bind=engine)
