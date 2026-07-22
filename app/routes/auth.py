@@ -75,7 +75,9 @@ def login_user(user_data: UserCreate):
 
 
     response = RedirectResponse(url="/", status_code=303)
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True) 
+    # Използваме set_cookie, за да защитим бисквитката от JavaScript. Така тя е видима само за бекенда. 
+    # В същото време браузърът автоматично я изпраща към бекенда при всяка следваща HTTP заявка.
 
     return response
 
@@ -88,3 +90,21 @@ def logout_user():
     response.delete_cookie(key="access_token")
     
     return response
+
+# създаване на първоначален администраторски акаунт, ако такъв не съществува
+def create_initial_admin():
+    db = manager.db
+
+    admin_user = db.query(models.User).filter(models.User.username == "admin").first()
+
+    if not admin_user:
+        hashed_password = HashHandler.hash_password("admin")
+        initial_admin = models.User(
+            username="admin", 
+            hashed_password=hashed_password,
+            role=models.UserRole.ADMIN.value  # задаваме ролята на потребителя като "admin" задължително
+            )
+        db.add(initial_admin)
+        db.commit()
+        db.refresh(initial_admin)
+        

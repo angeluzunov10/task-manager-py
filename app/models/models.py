@@ -50,11 +50,6 @@ class BaseTask(Base): # наследяваме от Base, който е в datab
         return task
 
 
-    # def __init__(self, title, description):       това вече не е нужно, защото SQLAlchemy се грижи за инициализацията
-    #     self.__status = 'Pending'
-    #     self.title = title
-    #     self.description = description 
-
     def get_status(self):
         return self.status
     

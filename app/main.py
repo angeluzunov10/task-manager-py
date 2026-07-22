@@ -32,6 +32,9 @@ if ENVIRONMENT == "production":
 # Създаваме таблиците
 models.Base.metadata.create_all(bind=engine)
 
+# Създанаме първи администратор, ако няма такъв в базата данни
+auth.create_initial_admin()
+
 # Пътища за static
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 static_dir = os.path.join(BASE_DIR, "static")
