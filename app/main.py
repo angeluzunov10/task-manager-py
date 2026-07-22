@@ -30,8 +30,6 @@ if os.path.exists(static_dir):
 else:
     print("WARNING: Static directory not found!")
 
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
-
 # ВКЛЮЧВАМЕ РУТЕРИТЕ (Магията на APIRouter)
 app.include_router(auth.router)
 app.include_router(admin.router)
