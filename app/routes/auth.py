@@ -5,7 +5,7 @@ import app.models.models as models
 from app.models.task_manager import TaskManager
 from fastapi.templating import Jinja2Templates
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from jose import jwt
 from passlib.context import CryptContext
 from dotenv import load_dotenv
@@ -15,7 +15,7 @@ load_dotenv()
 # Настройки за сигурност
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Настройваме шаблоните
@@ -39,37 +39,10 @@ class TokenHandler:
     @staticmethod
     def create_access_token(data: dict):
         to_encode = data.copy()
-        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-def create_initial_admin():
-    admin = manager.db.query(models.User).filter(models.User.username == "admin").first()
-    if not admin:
-        hashed_pw = HashHandler.hash_password("admin")
-        new_admin = models.User(username="admin", hashed_password=hashed_pw, role=models.UserRole.ADMIN)
-        manager.db.add(new_admin)
-        manager.db.commit()
-
-@router.post("/register", response_model=UserResponse)
-def register_user(user_data: UserCreate):
-    existing_user = manager.db.query(models.User).filter(models.User.username == user_data.username).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Username already taken")
-    
-    hashed_password = HashHandler.hash_password(user_data.password)
-    
-    new_user = models.User(
-        username=user_data.username, 
-        hashed_password=hashed_password, 
-        role=models.UserRole.USER.value
-    )
-
-    manager.db.add(new_user)
-    manager.db.commit()
-    manager.db.refresh(new_user)
-    return new_user
-       
 # --- ЕНДПОИНТИ ---
 @router.post("/register", response_model=UserResponse)
 def register_user(user_data: UserCreate):
@@ -95,20 +68,17 @@ def get_login_page(request: Request):
 @router.post("/login")
 def login_user(user_data: UserCreate):
     user = manager.db.query(models.User).filter(models.User.username == user_data.username).first()
-    
-    # Лог за дебъг (можеш да го махнеш после)
-    if not user:
-        print(f"DEBUG: User {user_data.username} not found")
-    elif not HashHandler.verify_password(user_data.password, user.hashed_password):
-        print(f"DEBUG: Password mismatch for {user_data.username}")
-
     if not user or not HashHandler.verify_password(user_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid username or password")
     
     access_token = TokenHandler.create_access_token(data={"sub": user.username})
 
+
     response = RedirectResponse(url="/", status_code=303)
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True) 
+    # Използваме set_cookie, за да защитим бисквитката от JavaScript. Така тя е видима само за бекенда. 
+    # В същото време браузърът автоматично я изпраща към бекенда при всяка следваща HTTP заявка.
+
     return response
 
 @router.get("/logout")
@@ -120,3 +90,21 @@ def logout_user():
     response.delete_cookie(key="access_token")
     
     return response
+
+# създаване на първоначален администраторски акаунт, ако такъв не съществува
+def create_initial_admin():
+    db = manager.db
+
+    admin_user = db.query(models.User).filter(models.User.username == "admin").first()
+
+    if not admin_user:
+        hashed_password = HashHandler.hash_password("admin")
+        initial_admin = models.User(
+            username="admin", 
+            hashed_password=hashed_password,
+            role=models.UserRole.ADMIN.value  # задаваме ролята на потребителя като "admin" задължително
+            )
+        db.add(initial_admin)
+        db.commit()
+        db.refresh(initial_admin)
+        
